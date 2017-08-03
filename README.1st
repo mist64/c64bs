@@ -1,0 +1,14 @@
+
+These are patches for the C64 operating system.
+-----------------------------------------------
+
+For copying and warranty see the file MYCOPYING.ASC.
+
+Instructions are in c64bs.html. 
+
+The files "BS  1.??.S*" are source files (i.e. C64 BASIC loadable
+files) for the patches.
+
+The files "BS  1.??.ROM*" are the ROM images.
+
+
