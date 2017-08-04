@@ -1,1115 +1,1115 @@
 .feature labels_without_colons, pc_assignment
 ; ****************************
-	FLAG =$0298
-	FF =255
-	SERI2 =$029B
-	SERI1 =$029C
-	SERO2 =$029E
-	SERO1 =$029D
-	SERST =$0297
-	MAP  =$0299
-	BLNKT =$0313
-	BLNK1 =$02BE
-	BLNK2 =$02BF
-	ACIA =$D600
-	MIKE  =1
-.IF MIKE
+	flag =$0298
+	ff =255
+	seri2 =$029b
+	seri1 =$029c
+	sero2 =$029e
+	sero1 =$029d
+	serst =$0297
+	map  =$0299
+	blnkt =$0313
+	blnk1 =$02be
+	blnk2 =$02bf
+	acia =$d600
+	mike  =1
+.if mike
 
-	*=$ECD9
-BC	.BYT 11,0
+	*=$ecd9
+bc	.byt 11,0
 
-	*=$E535
-	.BYT 15
-	TPI =$D500
-RTSB =4
-.ELSE
-	TPI =$DF00
-	BC =$ECD9
-.ENDIF
+	*=$e535
+	.byt 15
+	tpi =$d500
+rtsb =4
+.else
+	tpi =$df00
+	bc =$ecd9
+.endif
 
 ;
 ;********************************
 ;--------------------------------
-;AENDERUNGEN AM ROM
+;aenderungen am rom
 ;--------------------------------
-;FARBE FUER CLR/HOME HINTERGRUND
-	*=$E4DA
-	LDA $0286
+;farbe fuer clr/home hintergrund
+	*=$e4da
+	lda $0286
 
-	*=$EB1C
-	LDY #3; CURSOR SPEED
+	*=$eb1c
+	ldy #3; cursor speed
 
-	*=$FF7D
-	JMP NRESET; CLKHI BEI CONT UND RS232 INIT
+	*=$ff7d
+	jmp nreset; clkhi bei cont und rs232 init
 
 ;********************************
 ;--------------------------------
-;        RS 232 PER ACIA
+;        rs 232 per acia
 ;--------------------------------
-; BELEGT     $F014-$F0AC
-;            $F409-$F49D
+; belegt     $f014-$f0ac
+;            $f409-$f49d
 ;--------------------------------
-.IF MIKE
-	SERTS =TPI+2
-.ENDIF
-;-------OPEN
-	*=$F409
-RSOPEN	LDY #0
-	STY SERST
-RS0	CPY $B7
-	BEQ RS1
-	LDA ($BB),Y
-	STA $0293,Y
-	INY
-	CPY #$04
-	BNE RS0
-RS1	LDA $0293
-	ORA #16
-	SEI
-	STA ACIA+1
-	STA ACIA+3
-	LDA $0294
-	AND #$F0
-	ORA #$07
-	STA ACIA+2
-	LDA ACIA+1
-	LDA #0
-	STA $02A1
-	CLI
-	JSR $FE27
-	LDA $F8
-	BNE RS2
-	DEY
-	STY $F8
-	STX $F7
-RS2	LDA $FA
-	BNE RS3
-	DEY
-	STY $FA
-	STX $F9
-RS3	SEC
-	LDA #$F0
-	JMP $FE2D
+.if mike
+	serts =tpi+2
+.endif
+;-------open
+	*=$f409
+rsopen	ldy #0
+	sty serst
+rs0	cpy $b7
+	beq rs1
+	lda ($bb),y
+	sta $0293,y
+	iny
+	cpy #$04
+	bne rs0
+rs1	lda $0293
+	ora #16
+	sei
+	sta acia+1
+	sta acia+3
+	lda $0294
+	and #$f0
+	ora #$07
+	sta acia+2
+	lda acia+1
+	lda #0
+	sta $02a1
+	cli
+	jsr $fe27
+	lda $f8
+	bne rs2
+	dey
+	sty $f8
+	stx $f7
+rs2	lda $fa
+	bne rs3
+	dey
+	sty $fa
+	stx $f9
+rs3	sec
+	lda #$f0
+	jmp $fe2d
 
-;-------- RESET
-NRESET	JSR FRESET
-RSRESET	STA ACIA+1
-	RTS
+;-------- reset
+nreset	jsr freset
+rsreset	sta acia+1
+	rts
 
-;-------- BASIN
-RSBASIN	LDA SERST
-	LDY SERI1
-	CPY SERI2
-	BEQ RSBIE
-	AND #$F7
-	STA SERST
-	LDA ($F7),Y
-	INC SERI1
-	PHA
-	LDA $0294
-	AND #1
-	BEQ RSBI1
-	LDA SERI1
-	SEC
-	SBC SERI2
-	CMP #$C0
-	BCC RSBI1
-.IF !MIKE
-	LDA ACIA+2
-	AND #$F3
-	ORA #$04
-	STA ACIA+2
-.ELSE
-	LDA SERTS
-	AND #FF-RTSB
-	STA SERTS
-.ENDIF
-RSBI1	PLA
-	CLC
-	RTS
-RSBIE	ORA #$08
-	STA SERST
-	LDA #0
-	RTS
+;-------- basin
+rsbasin	lda serst
+	ldy seri1
+	cpy seri2
+	beq rsbie
+	and #$f7
+	sta serst
+	lda ($f7),y
+	inc seri1
+	pha
+	lda $0294
+	and #1
+	beq rsbi1
+	lda seri1
+	sec
+	sbc seri2
+	cmp #$c0
+	bcc rsbi1
+.if !mike
+	lda acia+2
+	and #$f3
+	ora #$04
+	sta acia+2
+.else
+	lda serts
+	and #ff-rtsb
+	sta serts
+.endif
+rsbi1	pla
+	clc
+	rts
+rsbie	ora #$08
+	sta serst
+	lda #0
+	rts
 
-;F49E
-;-------- CLOSE
-	*=$F2AF
-	JSR RSRESET
+;f49e
+;-------- close
+	*=$f2af
+	jsr rsreset
 
-	*=$F2C5
-	JMP RS3
+	*=$f2c5
+	jmp rs3
 
-;-------- CHKIN
-	*=$F227
-	JMP RSCHKIN
+;-------- chkin
+	*=$f227
+	jmp rschkin
 
-;-------- CHKOUT
-	*=$F26C
-	JMP RSCKOUT
+;-------- chkout
+	*=$f26c
+	jmp rsckout
 
-;-------- BSOUT
-	*=$F014
-	NOP
-	NOP
-	NOP
-RSBSOUT	LDY SERO2
-	INY
-	CPY SERO1
-	BEQ RSBSOUT
-	STY SERO2
-	DEY
-	LDA $9E
-	STA ($F9),Y
-CRTS	CLC
-	RTS
+;-------- bsout
+	*=$f014
+	nop
+	nop
+	nop
+rsbsout	ldy sero2
+	iny
+	cpy sero1
+	beq rsbsout
+	sty sero2
+	dey
+	lda $9e
+	sta ($f9),y
+crts	clc
+	rts
 
-;-------- IRQ
-RSIR1	TAX
-	LDA SERST
-	AND #$0C
-	STA SERST
-	TXA
-	AND #$63
-	ORA SERST
-	STA SERST
+;-------- irq
+rsir1	tax
+	lda serst
+	and #$0c
+	sta serst
+	txa
+	and #$63
+	ora serst
+	sta serst
 ;----
-	TXA
-	AND #%00001000
-	BEQ SI3
-	LDA ACIA
-	LDY SERI2
-	STA ($F7),Y
-	INY
-	LDA SERST
-	CPY SERI1
-	BNE SI2
-	ORA #4
-	STA SERST
-SI2	STY SERI2
+	txa
+	and #%00001000
+	beq si3
+	lda acia
+	ldy seri2
+	sta ($f7),y
+	iny
+	lda serst
+	cpy seri1
+	bne si2
+	ora #4
+	sta serst
+si2	sty seri2
 ;----
-	LDA $0294
-	AND #1
-	BEQ SI3
-	LDA SERI1
-	SEC
-	SBC SERI2;=FREI
-	CMP #$40
-	BCS SI3; MEHR ALS 1/4
-.IF !MIKE
-	LDA ACIA+2
-	AND #$F3
-	STA ACIA+2
-.ELSE
-	LDA SERTS
-	ORA #RTSB
-	STA SERTS
-.ENDIF
+	lda $0294
+	and #1
+	beq si3
+	lda seri1
+	sec
+	sbc seri2;=frei
+	cmp #$40
+	bcs si3; mehr als 1/4
+.if !mike
+	lda acia+2
+	and #$f3
+	sta acia+2
+.else
+	lda serts
+	ora #rtsb
+	sta serts
+.endif
 ;----
-SI3	TXA
-	AND #%00010000
-	BEQ SI6
-	LDY SERO1
-	CPY SERO2
-	BEQ SI6
-	LDA ($F9),Y
-	JMP SII
+si3	txa
+	and #%00010000
+	beq si6
+	ldy sero1
+	cpy sero2
+	beq si6
+	lda ($f9),y
+	jmp sii
 ;----
-	JMP RSBASIN ;(	*=F086)
-SII	STA ACIA
-	INY
-	STY SERO1
+	jmp rsbasin ;(	*=f086)
+sii	sta acia
+	iny
+	sty sero1
 ;----
-SI6	LDA ACIA+1
-	RTS
+si6	lda acia+1
+	rts
 ;----
-RSIRQ	LDA ACIA+1
-	BPL RSIR2
-	JSR RSIR1
-	JMP $EA81
-RSIR2	JMP RSIR3
-	NOP
-	NOP
-	RTS; F0A4
-RSIR3	JSR $FFEA
-	JMP BLIRQ
+rsirq	lda acia+1
+	bpl rsir2
+	jsr rsir1
+	jmp $ea81
+rsir2	jmp rsir3
+	nop
+	nop
+	rts; f0a4
+rsir3	jsr $ffea
+	jmp blirq
 
-;$EA34
-;-------- CHKIN/CKOUT
-RSCHKIN	STA $99
-	CLC
-	RTS
-RSCKOUT	STA $9A
-	CLC
-	RTS
+;$ea34
+;-------- chkin/ckout
+rschkin	sta $99
+	clc
+	rts
+rsckout	sta $9a
+	clc
+	rts
 
-;F0BD
+;f0bd
 ;--------------------------------
-;-------- NMIOUT ADRS
-	*=$ED0E
-	NOP
-	NOP
-	NOP
+;-------- nmiout adrs
+	*=$ed0e
+	nop
+	nop
+	nop
 
-	*=$F88A
-	NOP
-	NOP
-	NOP
-;-------- NMI-EINSPRUNG LOESCHEN
-	*=$FE54
-	NOP
-	NOP
+	*=$f88a
+	nop
+	nop
+	nop
+;-------- nmi-einsprung loeschen
+	*=$fe54
+	nop
+	nop
 
-	*=$FE72
-	JMP $FEB6
+	*=$fe72
+	jmp $feb6
 
-;-------- IRQ SETZEN
-	*=$EA31
-	JMP RSIRQ
+;-------- irq setzen
+	*=$ea31
+	jmp rsirq
 
 ;********************************
 ;-------------------------------
-	*=$E1E6
-	JSR LSP; LOAD/SAVE IM DIR
+	*=$e1e6
+	jsr lsp; load/save im dir
 
-	*=$E1D9
-	LDX #8
-	LDY #1
-	JSR LSD
+	*=$e1d9
+	ldx #8
+	ldy #1
+	jsr lsd
 
-	*=$E5E7
-	JSR KEY; F-TASTEN
+	*=$e5e7
+	jsr key; f-tasten
 
-	*=$ECE7 ; SHIFT RUN/STOP
-	.BYT 'L','O'+$80,34,'*'
+	*=$ece7 ; shift run/stop
+	.byt 'L','O'+$80,34,'*'
 
-	*=$E44B
-	.WORD NEUBEF ;BASIC-
+	*=$e44b
+	.word neubef ;basic-
 
-	*=$E451
-	.WORD GETAUS ;VEKTOREN
+	*=$e451
+	.word getaus ;vektoren
 
-	*=$EC78
-	.BYT $84 ;CTRL INST
+	*=$ec78
+	.byt $84 ;ctrl inst
 
-	*=$ECAB
-	.BYT $82 ;CTRL HOME
+	*=$ecab
+	.byt $82 ;ctrl home
 
-	*=$EC7A
-	.BYT $81 ;CTRL CRSR RIGHT
+	*=$ec7a
+	.byt $81 ;ctrl crsr right
 
 ;--------------------------------
-	*=$EEBB
-LSD	JSR $FFBA
-TSTBA	LDA FLAG
-	BPL LSP1
-	AND #15
-	STA $BA
-	RTS
-LSP	JSR $0079
-	CMP #','
-	BEQ LSP1
-	PLA
-	PLA
-	JMP $A8F8
-LSP1	RTS
-KEY	JSR $E5B4
-	BIT $9D
-	BPL LSP1
-	BIT FLAG
-	BPL LSP1
-	CMP #3
-	BNE KEY2
-CLR	LDX #0
-	STX $C7
-	STX $D4
-	STX $D8
-	BEQ LSP1
-KEY2	CMP #$81
-	BCC LSP1
-	BNE KEY3
-	LDY $D5
-	INY
-KL1	DEY
-	BMI KL2
-	LDA ($D1),Y
-	CMP #' '
-	BEQ KL1
-KL2	STY $D3
-	CPY $D5
-	BEQ K3C
-	INC $D3
-	BNE K3C
-KEY3	CMP #$82
-	BNE KEY4
-	LDX #24
-	LDY #0
-	CLC
-	JSR $FFF0
-K3C	JSR CLR
-	JMP K3
-KEY4	CMP #$84
-	BNE KEY5
-	LDA #' '
-	LDY $D3
-K4	CPY $D5
-	BEQ K5
-	BCS K3C
-K5	STA ($D1),Y
-	INY
-	BNE K4
-KEY5	CMP #140
-	BEQ K8
-	BCS LSP1
-	CMP #137
-	BEQ LSP1
-	CMP #133
-	BCC LSP1
-	SBC #133
-	TAY
-	LDX KEY1,Y
-	LDY #1
-K1	LDA KT,X
-	BEQ K2
-KTX	STA $0276,Y
-	INY
-	INX
-	BNE K1
-K8	LDA #'@'
-	STA $0277
-	LDA FLAG
-	AND #15
-	EOR #1
-	ORA #'0'
-	STA $0278
-	LDA #13
-	STA $0279
-	LDY #3
-K2	STY $C6
-K3	PLA
-	PLA
-	JMP $E5CD
+	*=$eebb
+lsd	jsr $ffba
+tstba	lda flag
+	bpl lsp1
+	and #15
+	sta $ba
+	rts
+lsp	jsr $0079
+	cmp #','
+	beq lsp1
+	pla
+	pla
+	jmp $a8f8
+lsp1	rts
+key	jsr $e5b4
+	bit $9d
+	bpl lsp1
+	bit flag
+	bpl lsp1
+	cmp #3
+	bne key2
+clr	ldx #0
+	stx $c7
+	stx $d4
+	stx $d8
+	beq lsp1
+key2	cmp #$81
+	bcc lsp1
+	bne key3
+	ldy $d5
+	iny
+kl1	dey
+	bmi kl2
+	lda ($d1),y
+	cmp #' '
+	beq kl1
+kl2	sty $d3
+	cpy $d5
+	beq k3c
+	inc $d3
+	bne k3c
+key3	cmp #$82
+	bne key4
+	ldx #24
+	ldy #0
+	clc
+	jsr $fff0
+k3c	jsr clr
+	jmp k3
+key4	cmp #$84
+	bne key5
+	lda #' '
+	ldy $d3
+k4	cpy $d5
+	beq k5
+	bcs k3c
+k5	sta ($d1),y
+	iny
+	bne k4
+key5	cmp #140
+	beq k8
+	bcs lsp1
+	cmp #137
+	beq lsp1
+	cmp #133
+	bcc lsp1
+	sbc #133
+	tay
+	ldx key1,y
+	ldy #1
+k1	lda kt,x
+	beq k2
+ktx	sta $0276,y
+	iny
+	inx
+	bne k1
+k8	lda #'@'
+	sta $0277
+	lda flag
+	and #15
+	eor #1
+	ora #'0'
+	sta $0278
+	lda #13
+	sta $0279
+	ldy #3
+k2	sty $c6
+k3	pla
+	pla
+	jmp $e5cd
 
-KEY1	.BYT 0, KT3-KT, KT5-KT, KT7-KT
-	.BYT <-1, KT4-KT, KT6-KT
-KT	.BYT "LIST"
-	.BYT 13,0
-KT3	.BYT "RUN:"
-	.BYT 13,0
-KT5	.BYT "LOAD"
-	.BYT 13,0
-KT7	.BYT ">$0"
-	.BYT 13,0
-KT4	.BYT "_"
-	.BYT 13,0
-KT6	.BYT "SAVE"
-	.BYT 0
+key1	.byt 0, kt3-kt, kt5-kt, kt7-kt
+	.byt <-1, kt4-kt, kt6-kt
+kt	.byt "list"
+	.byt 13,0
+kt3	.byt "run:"
+	.byt 13,0
+kt5	.byt "load"
+	.byt 13,0
+kt7	.byt ">$0"
+	.byt 13,0
+kt4	.byt "_"
+	.byt 13,0
+kt6	.byt "save"
+	.byt 0
 
-GETAUS	BIT FLAG
-	BMI GETOK
-	JMP $AE86
-GETOK	LDA #0
-	STA $0D
-	JSR $0073
-	CMP #'$'
-	BEQ GTA1
-	CMP #'%'
-	BEQ GTA2
-	JSR $0079
-	JMP $AE8D
-GTA2	LDA #0
-	STA $63
-	STA $62
-GTA2A	JSR $0073
-	BCS GTAE
-	CMP #'2'
-	BCS GTAERR
-	LSR
-	ROL $63
-	ROL $62
-	BCC GTA2A
-GTAERR	JMP $B248 ; ILL. QUANTITY
-GTA1	LDA #0
-	STA $62
-GTA1A	STA $63
-	JSR $0073
-	SEC
-	SBC #'0'
-	BCC GTAE
-	CMP #10
-	BCC GTA1O
-	SBC #'A'-'9'-1
-	CMP #10
-	BCC GTAE
-	CMP #16
-	BCS GTAERR
-GTA1O	PHA
-	LDY #4
-GTA3	ASL $63
-	ROL $62
-	BCS GTAERR
-	DEY
-	BNE GTA3
-	PLA
-	ORA $63
-	JMP GTA1A
-GTAE	LDX #$90
-	SEC
-	JSR $BC49
-	JMP $0079
-;F014
+getaus	bit flag
+	bmi getok
+	jmp $ae86
+getok	lda #0
+	sta $0d
+	jsr $0073
+	cmp #'$'
+	beq gta1
+	cmp #'%'
+	beq gta2
+	jsr $0079
+	jmp $ae8d
+gta2	lda #0
+	sta $63
+	sta $62
+gta2a	jsr $0073
+	bcs gtae
+	cmp #'2'
+	bcs gtaerr
+	lsr
+	rol $63
+	rol $62
+	bcc gta2a
+gtaerr	jmp $b248 ; ill. quantity
+gta1	lda #0
+	sta $62
+gta1a	sta $63
+	jsr $0073
+	sec
+	sbc #'0'
+	bcc gtae
+	cmp #10
+	bcc gta1o
+	sbc #'A'-'9'-1
+	cmp #10
+	bcc gtae
+	cmp #16
+	bcs gtaerr
+gta1o	pha
+	ldy #4
+gta3	asl $63
+	rol $62
+	bcs gtaerr
+	dey
+	bne gta3
+	pla
+	ora $63
+	jmp gta1a
+gtae	ldx #$90
+	sec
+	jsr $bc49
+	jmp $0079
+;f014
 ;--------------------------------
 ;--------------------------------
-	*=$FE75
-NB1F	LDA #0
-	STA $90
-	LDA $BA
-	JSR $FFB1
-	LDA $0201
-	CMP #'$'
-	BNE NB1C
-	LDA #$F0
-	.BYT $2C
-NB1C	LDA #$FF
-	JSR $FF93
-	LDA $90
-	BMI NBA1E
-	LDY #0
-NBA1A	LDA $0201,Y
-	BEQ NB1E
-	JSR $FFA8
-	INY
-	BNE NBA1A
-NB1E	JSR $FFAE
-	LDA $90
-	BNE NBA1E
-	LDA $BA
-	JSR $FFB4
-	LDA $0201
-	CMP #'$'
-	JMP NB1G
-;FFB6
+	*=$fe75
+nb1f	lda #0
+	sta $90
+	lda $ba
+	jsr $ffb1
+	lda $0201
+	cmp #'$'
+	bne nb1c
+	lda #$f0
+	.byt $2c
+nb1c	lda #$ff
+	jsr $ff93
+	lda $90
+	bmi nba1e
+	ldy #0
+nba1a	lda $0201,y
+	beq nb1e
+	jsr $ffa8
+	iny
+	bne nba1a
+nb1e	jsr $ffae
+	lda $90
+	bne nba1e
+	lda $ba
+	jsr $ffb4
+	lda $0201
+	cmp #'$'
+	jmp nb1g
+;ffb6
 ;--------------------------------
-	*=$FEC2
-NB1G	BEQ NB1D
-	LDA #$FF
-	JSR $FF96
-NB1B	JSR $FFA5
-	JSR $E716
-	LDA $90
-	BEQ NB1B
-NBDE	JSR $FFAB
-NBA1E	PLA
-	PLA
-	JMP $E386
-NB1D	LDA #$F0
-	JSR $FF96
-	JSR $FFA5
-	JSR $FFA5
-NBDL	JSR $FFA5
-	JSR $FFA5
-	LDX $90
-	BNE EDL3
-	JSR $FFA5
-	TAX
-	JSR $FFA5
-	JSR $BDCD
-EDL1	JSR $FFA5
-	LDX $90
-	BNE EDL2
-	JSR $E716
-	CMP #0
-	BNE EDL1
-EDL2	LDA #13
-	JSR $E716
-	JSR $FFE4
-	BNE EDL3
-	LDA $90
-	BEQ NBDL
-EDL3	JSR $FFAB
-	LDA $BA
-	JSR $FFB1
-	LDA #$E0
-	JSR $FF93
-	JSR $FFAE
-	JMP NBA1E
-	STA ACIA+1
-	JMP $FF6E
-;FF48
-;******** KASSETTE LOESCHEN *****
-	*=$F5F8
-	BCC $F5F1 ; SAVE
+	*=$fec2
+nb1g	beq nb1d
+	lda #$ff
+	jsr $ff96
+nb1b	jsr $ffa5
+	jsr $e716
+	lda $90
+	beq nb1b
+nbde	jsr $ffab
+nba1e	pla
+	pla
+	jmp $e386
+nb1d	lda #$f0
+	jsr $ff96
+	jsr $ffa5
+	jsr $ffa5
+nbdl	jsr $ffa5
+	jsr $ffa5
+	ldx $90
+	bne edl3
+	jsr $ffa5
+	tax
+	jsr $ffa5
+	jsr $bdcd
+edl1	jsr $ffa5
+	ldx $90
+	bne edl2
+	jsr $e716
+	cmp #0
+	bne edl1
+edl2	lda #13
+	jsr $e716
+	jsr $ffe4
+	bne edl3
+	lda $90
+	beq nbdl
+edl3	jsr $ffab
+	lda $ba
+	jsr $ffb1
+	lda #$e0
+	jsr $ff93
+	jsr $ffae
+	jmp nba1e
+	sta acia+1
+	jmp $ff6e
+;ff48
+;******** kassette loeschen *****
+	*=$f5f8
+	bcc $f5f1 ; save
 
-	*=$F4B6
-	BCC $F4AF ; LOAD
+	*=$f4b6
+	bcc $f4af ; load
 
-	*=$F38B
-	JMP $F713 ; OPEN
+	*=$f38b
+	jmp $f713 ; open
 
-	*=$F2C8
-	JMP $F713 ; CLOSE
+	*=$f2c8
+	jmp $f713 ; close
 
-	*=$F26F
-	JMP $F713 ; CKOUT
+	*=$f26f
+	jmp $f713 ; ckout
 
-	*=$F225
-	BNE $F26F ; CHKIN
+	*=$f225
+	bne $f26f ; chkin
 
-	*=$F1E5
-	SEC
-	BCS $F1FD ; BSOUT
+	*=$f1e5
+	sec
+	bcs $f1fd ; bsout
 
-	*=$F179
-	SEC
-	RTS   ; BASIN
+	*=$f179
+	sec
+	rts   ; basin
 
-;******* PARALLELER IEC-BUS *****
-Z1 =$94
-Z2 =$95
-Z4 =$A3
-Z3 =$0285
-B1 =$FE1C
-B2 =$DC07
-B3 =$DC0D
-B4 =$DC0F
-B5 =TPI
-B6 =TPI+1
-B7 =TPI+3
-B8 =TPI+4
-C1 =B5
-C2 =TPI+2
-C3 =TPI+3
-C4 =B8
-C5 =TPI+5
-	*=$FDAB
-	JSR NINI
+;******* paralleler iec-bus *****
+z1 =$94
+z2 =$95
+z4 =$a3
+z3 =$0285
+b1 =$fe1c
+b2 =$dc07
+b3 =$dc0d
+b4 =$dc0f
+b5 =tpi
+b6 =tpi+1
+b7 =tpi+3
+b8 =tpi+4
+c1 =b5
+c2 =tpi+2
+c3 =tpi+3
+c4 =b8
+c5 =tpi+5
+	*=$fdab
+	jsr nini
 
-	*=$FD50
-	JMP NMINI
+	*=$fd50
+	jmp nmini
 
-	*=$ED0E
-	JMP NTALK; UND LISTEN
+	*=$ed0e
+	jmp ntalk; und listen
 
-	*=$EDBB
-	JMP NSECL
+	*=$edbb
+	jmp nsecl
 
-	*=$EDC9
-	JMP NSECT
+	*=$edc9
+	jmp nsect
 
-	*=$EDDD
-	JMP NOUT
-	NOP
+	*=$eddd
+	jmp nout
+	nop
 
-	*=$EDF0
-	JMP NUT
+	*=$edf0
+	jmp nut
 
-	*=$EE00
-	JMP NUL
+	*=$ee00
+	jmp nul
 
-	*=$EE13
-	JMP NIN
+	*=$ee13
+	jmp nin
 
-	*=$F281
-	JSR NATNHI
+	*=$f281
+	jsr natnhi
 
-	*=$F72C
-NINI	STA $DC00
-IECINI
-.IF MIKE
-	LDA #%00011100
-	STA C5
-	LDA #0
-	STA C2
-.ENDIF
-	LDA C2
-	AND #239
-	STA C2
-	LDY #0
-	STY C4
-	LDA #58
-	STA C1
-	LDA #63
-	STA C3
-	LDA C2
-	AND #254
-	STA C2
-	LDY #255
-L0	DEY
-	NOP
-	BNE L0
-	LDA C2
-	ORA #1
-	STA C2
-	LDA #57
-	STA C1
-	JMP $FDAE
-	;RTS
+	*=$f72c
+nini	sta $dc00
+iecini
+.if mike
+	lda #%00011100
+	sta c5
+	lda #0
+	sta c2
+.endif
+	lda c2
+	and #239
+	sta c2
+	ldy #0
+	sty c4
+	lda #58
+	sta c1
+	lda #63
+	sta c3
+	lda c2
+	and #254
+	sta c2
+	ldy #255
+l0	dey
+	nop
+	bne l0
+	lda c2
+	ora #1
+	sta c2
+	lda #57
+	sta c1
+	jmp $fdae
+	;rts
 ;*****
-IECTALK	ORA #64
-	.BYT $2C
-IECLISTEN
-	ORA #32
-IECTL
-L1	PHA
-	LDA #59
-	STA B7
-	LDA #255
-	STA B6
-	STA B8
-	LDA #250
-	STA B5
-	LDA Z1
-	BPL L2
-	LDA B5
-	AND #223
-	STA B5
-	LDA Z2
-	JSR L7
-	LDA Z1
-	AND #127
-	STA Z1
-	LDA B5
-	ORA #32
-	STA B5
-L2	LDA B5
-	AND #247
-	STA B5
-	PLA
-	JMP L7
-SECLISTEN
-	JSR L7
-L3	LDA B5
-	ORA #8
-	STA B5
-	RTS
-SECTALK	JSR L7
-L4	LDA #61
-	AND B5
-	STA B5
-	LDA #195
-	STA B7
-	LDA #0
-	STA B8
-	BEQ L3
-IECOUT	PHA
-	LDA Z1
-	BPL L5
-	LDA Z2
-	JSR L7
-	LDA Z1
-L5	ORA #128
-	STA Z1
-	PLA
-	STA Z2
-	CLC
-	RTS
-UNTALK	LDA #95
-	BNE L6
-UNLISTEN
-	LDA #63
-L6	JSR L1
-	JSR L4
-	LDA #253
-	ORA B5
-	STA B5
-	CLI
-	RTS
-L7	EOR #255
-	STA B6
-	LDA B5
-	ORA #18
-	STA B5
-	BIT B5
-	BVC L8
-	BPL L8
-	LDA #128
-	JSR B1
-	BNE L12
-L8	LDA B5
-	BPL L8
-	AND #239
-	STA B5
-L9	JSR L18
-L10	BIT B5
-	BVS L11
-	LDA B3
-	AND #2
-	BEQ L10
-	LDA Z3
-	BMI L9
-	LDA #1
-	JSR B1
-L11	LDA B5
-	ORA #16
-	STA B5
-L12	LDA #255
-	STA B6
-	RTS
-IECIN	LDA B5
-	AND #189
-	ORA #129
-	STA B5
-L13	JSR L18
-L14	LDA B5
-	AND #16
-	BEQ L15
-	LDA B3
-	AND #2
-	BEQ L14
-	LDA Z3
-	BMI L13
-	LDA #2
-	JSR B1
-	LDA B5
-	AND #61
-	STA B5
-	LDA #13
-	CLC
-	RTS
-L15	LDA B5
-	AND #127
-	STA B5
-	AND #32
-	BNE L16
-	LDA #64
-	JSR B1
-L16	LDA B6
-	EOR #255
-	PHA
-	LDA B5
-	ORA #64
-	STA B5
-L17	LDA B5
-	AND #16
-	BEQ L17
-	LDA B5
-	AND #191
-	STA B5
-	PLA
-	CLC
-	RTS
-L18	LDA #255
-	STA B2
-	LDA #17
-	STA B4
-	LDA B3
-	RTS
-;**** EINBINDUNG
-NTALK	JSR SETDEV
-	BIT MAP
-	BPL OTL
-	JMP IECTL
-OTL	JSR $F0A4
-	JMP $ED11
-NSECL	BIT MAP
-	BPL OSL
-	JMP SECLISTEN
-OSL	JSR $ED36
-	JMP $EDBE
-NSECT	BIT MAP
-	BPL OST
-	JMP SECTALK
-OST	JSR $ED36
-	JMP $EDCC
-NOUT	BIT MAP
-	BPL OOUT
-	JMP IECOUT
-OOUT	BIT $94
-	BMI OOUT1
-	JMP $EDE1
-OOUT1	JMP $EDE6
-NUT	BIT MAP
-	BPL OUT
-	JMP UNTALK
-OUT	JSR $EE8E
-	JMP $EDF3
-NUL	BIT MAP
-	BPL OUL
-	JMP UNLISTEN
-OUL	JSR $ED11
-	JMP $EE03
-NIN	BIT MAP
-	BPL OIN
-	JMP IECIN
-OIN	SEI
-	LDA #0
-	JMP $EE16
-SETDEV	PHA
-	STY Z4
-	AND #15
-	SEC
-	SBC #4
-	BCC PIEC
-	CMP #7
-	BCS SIEC1;PIEC
-	TAY
-	LDA POT2,Y
-	LDY Z4
-	LSR Z4
-	AND MAP
-	BEQ PIEC
-SIEC1	LDA MAP
-	AND #127
-SIEC	STA MAP
-	PLA
-	RTS
-PIEC	LDA MAP
-	ORA #128
-	BNE SIEC
+iectalk	ora #64
+	.byt $2c
+ieclisten
+	ora #32
+iectl
+l1	pha
+	lda #59
+	sta b7
+	lda #255
+	sta b6
+	sta b8
+	lda #250
+	sta b5
+	lda z1
+	bpl l2
+	lda b5
+	and #223
+	sta b5
+	lda z2
+	jsr l7
+	lda z1
+	and #127
+	sta z1
+	lda b5
+	ora #32
+	sta b5
+l2	lda b5
+	and #247
+	sta b5
+	pla
+	jmp l7
+seclisten
+	jsr l7
+l3	lda b5
+	ora #8
+	sta b5
+	rts
+sectalk	jsr l7
+l4	lda #61
+	and b5
+	sta b5
+	lda #195
+	sta b7
+	lda #0
+	sta b8
+	beq l3
+iecout	pha
+	lda z1
+	bpl l5
+	lda z2
+	jsr l7
+	lda z1
+l5	ora #128
+	sta z1
+	pla
+	sta z2
+	clc
+	rts
+untalk	lda #95
+	bne l6
+unlisten
+	lda #63
+l6	jsr l1
+	jsr l4
+	lda #253
+	ora b5
+	sta b5
+	cli
+	rts
+l7	eor #255
+	sta b6
+	lda b5
+	ora #18
+	sta b5
+	bit b5
+	bvc l8
+	bpl l8
+	lda #128
+	jsr b1
+	bne l12
+l8	lda b5
+	bpl l8
+	and #239
+	sta b5
+l9	jsr l18
+l10	bit b5
+	bvs l11
+	lda b3
+	and #2
+	beq l10
+	lda z3
+	bmi l9
+	lda #1
+	jsr b1
+l11	lda b5
+	ora #16
+	sta b5
+l12	lda #255
+	sta b6
+	rts
+iecin	lda b5
+	and #189
+	ora #129
+	sta b5
+l13	jsr l18
+l14	lda b5
+	and #16
+	beq l15
+	lda b3
+	and #2
+	beq l14
+	lda z3
+	bmi l13
+	lda #2
+	jsr b1
+	lda b5
+	and #61
+	sta b5
+	lda #13
+	clc
+	rts
+l15	lda b5
+	and #127
+	sta b5
+	and #32
+	bne l16
+	lda #64
+	jsr b1
+l16	lda b6
+	eor #255
+	pha
+	lda b5
+	ora #64
+	sta b5
+l17	lda b5
+	and #16
+	beq l17
+	lda b5
+	and #191
+	sta b5
+	pla
+	clc
+	rts
+l18	lda #255
+	sta b2
+	lda #17
+	sta b4
+	lda b3
+	rts
+;**** einbindung
+ntalk	jsr setdev
+	bit map
+	bpl otl
+	jmp iectl
+otl	jsr $f0a4
+	jmp $ed11
+nsecl	bit map
+	bpl osl
+	jmp seclisten
+osl	jsr $ed36
+	jmp $edbe
+nsect	bit map
+	bpl ost
+	jmp sectalk
+ost	jsr $ed36
+	jmp $edcc
+nout	bit map
+	bpl oout
+	jmp iecout
+oout	bit $94
+	bmi oout1
+	jmp $ede1
+oout1	jmp $ede6
+nut	bit map
+	bpl out
+	jmp untalk
+out	jsr $ee8e
+	jmp $edf3
+nul	bit map
+	bpl oul
+	jmp unlisten
+oul	jsr $ed11
+	jmp $ee03
+nin	bit map
+	bpl oin
+	jmp iecin
+oin	sei
+	lda #0
+	jmp $ee16
+setdev	pha
+	sty z4
+	and #15
+	sec
+	sbc #4
+	bcc piec
+	cmp #7
+	bcs siec1;piec
+	tay
+	lda pot2,y
+	ldy z4
+	lsr z4
+	and map
+	beq piec
+siec1	lda map
+	and #127
+siec	sta map
+	pla
+	rts
+piec	lda map
+	ora #128
+	bne siec
 
-POT2	.BYT 1,2,4,8,$10,$20,$40
+pot2	.byt 1,2,4,8,$10,$20,$40
 
-NMINI	LDA #0
-	TAY
-	JSR $FD53
-.IF MIKE
-	LDA #%10000001
-.ELSE
-	LDA #%10000000
-.ENDIF
-	STA MAP
-	LDA #128
-	STA 650
-FRESET	LDA #8+128
-	STA FLAG
-	LDA #180
-	STA BLNK2
-	STA BLNKT
-.IF MIKE
-	LDA #50
-.ELSE
-	LDA #0
-.ENDIF
-	STA BLNK1
-	RTS
+nmini	lda #0
+	tay
+	jsr $fd53
+.if mike
+	lda #%10000001
+.else
+	lda #%10000000
+.endif
+	sta map
+	lda #128
+	sta 650
+freset	lda #8+128
+	sta flag
+	lda #180
+	sta blnk2
+	sta blnkt
+.if mike
+	lda #50
+.else
+	lda #0
+.endif
+	sta blnk1
+	rts
 
-NATNHI	BIT MAP
-	BPL OAH
-	JMP L3
-OAH	JMP $EDBE
-;***** WAS NICHT MIT KASSETE GEHT
-NEUBEF	BIT FLAG
-	BPL NEUEND
-	JSR TSTBA
-	LDA $0200
-	CMP #'@'
-	BEQ NBA1
-	CMP #'>'
-	BEQ NBA1
-	CMP #'!'
-	BEQ NBA2
-	CMP #'_'
-	BEQ SYSOFF
-NEUEND	JMP $A57C
-NBA2	LDA #1
-	TAY
-	STA ($2B),Y
-	JSR $A533
-	LDA $22
-	CLC
-	ADC #2
-	STA $2D
-	LDA $23
-	ADC #0
-	STA $2E
-	JSR $A663
-	JMP $E386
-NBA1	JSR $0073
-	BCC NBZ1
-	JMP NB1F
-NBZ1	JSR $B79E
-	TXA
-	AND #15
-	ORA #128
-	.BYT $2C
-SYSOFF	LDA #0
-NBA1EX	STA FLAG
-	JMP NBA1E
+natnhi	bit map
+	bpl oah
+	jmp l3
+oah	jmp $edbe
+;***** was nicht mit kassete geht
+neubef	bit flag
+	bpl neuend
+	jsr tstba
+	lda $0200
+	cmp #'@'
+	beq nba1
+	cmp #'>'
+	beq nba1
+	cmp #'!'
+	beq nba2
+	cmp #'_'
+	beq sysoff
+neuend	jmp $a57c
+nba2	lda #1
+	tay
+	sta ($2b),y
+	jsr $a533
+	lda $22
+	clc
+	adc #2
+	sta $2d
+	lda $23
+	adc #0
+	sta $2e
+	jsr $a663
+	jmp $e386
+nba1	jsr $0073
+	bcc nbz1
+	jmp nb1f
+nbz1	jsr $b79e
+	txa
+	and #15
+	ora #128
+	.byt $2c
+sysoff	lda #0
+nba1ex	sta flag
+	jmp nba1e
 
 ;*******************************
-;***** SCROLL-HALT
-	PCX1=*
-	*=$E940
-	EOR #%00100100
-	AND #%00100100
-	BEQ $E956
-	JMP PCX1
-	NOP
-	NOP
+;***** scroll-halt
+	pcx1=*
+	*=$e940
+	eor #%00100100
+	and #%00100100
+	beq $e956
+	jmp pcx1
+	nop
+	nop
 
-	*=PCX1
-	CMP #%00000100
-	BEQ S1;CTRL LANGSAM
-	CMP #%00100000
-	BNE S2;CTRL/CBM STOP
-	;JSR TESTHCOPY;NUR CBM
-S0	JMP $E938
-S1	JMP $E94B
-S2	LDA $DC01
-	CMP #$FF
-	BNE S2
-S3	LDA $DC01
-	AND #$20
-	BNE S3
-	BEQ S0
+	*=pcx1
+	cmp #%00000100
+	beq s1;ctrl langsam
+	cmp #%00100000
+	bne s2;ctrl/cbm stop
+	;jsr testhcopy;nur cbm
+s0	jmp $e938
+s1	jmp $e94b
+s2	lda $dc01
+	cmp #$ff
+	bne s2
+s3	lda $dc01
+	and #$20
+	bne s3
+	beq s0
 
 ;********************************
-.IF 0
-	TESTHCOPY LDA #$7F
-	STA $DC00
-	HC1 LDA $DC01
-	CMP $DC01
-	BNE HC1
-	AND #%00100010
-	BEQ HCOPY
-	CLC
-	RTS
-.ENDIF
+.if 0
+	testhcopy lda #$7f
+	sta $dc00
+	hc1 lda $dc01
+	cmp $dc01
+	bne hc1
+	and #%00100010
+	beq hcopy
+	clc
+	rts
+.endif
 ;********************************
 
-	LB0 =$B0
-	LB1 =LB0+1
-	L028E =$028E
-	HCDEV =4
-	HCSEC =7
-HCOPY	;INC 53280
-	LDA #$20
-	BIT $D011; TEST HIRES
-	BNE LC1AA
-	LDA L028E
-	BMI LC1AA
-	LDA #$80
-	STA L028E
-	LDA $DD00; ADRESSE BERECHNEN
-	LSR
-	LDA $D018
-	AND #$70
-	ROR
-	TAX
-	LDA $DD00
-	LSR
-	LSR
-	TXA
-	ROR
-	EOR #$C0
-	STA LB1; HIBYTE
-	LDA #$00
-	STA LB0
-	LDA #HCDEV
-	JSR $ED0C; LISTEN
-	LDA #$60+HCSEC; SECLISTEN
-	JSR $EDB9
-	LDA #13
-	JSR $EDDD
-	LDX #25
-LC1E0	LDY #$00
-LC1E2	LDA (LB0),Y
-	AND #$7F
-	CMP #$40
-	BCC LC1F2
-	CMP #$60
-	BCC LC1F0
-	EOR #$40
-LC1F0	EOR #$80
-LC1F2	CMP #$20
-	BCS LC1F8
-	EOR #$40
-LC1F8	JSR $EDDD
-	INY
-	CPY #$28
-	BCC LC1E2
-	LDA #$0D
-	JSR $EDDD
-	TYA
-	CLC
-	ADC LB0
-	STA LB0
-	BCC LC22A
-	INC LB1
-LC22A	DEX
-	BNE LC1E0
-	JSR $EDFE; UNLISTEN
-	JSR $EDFE
-	LDA #$00
-	STA L028E
-LC1AA	SEC
-	RTS
+	lb0 =$b0
+	lb1 =lb0+1
+	l028e =$028e
+	hcdev =4
+	hcsec =7
+hcopy	;inc 53280
+	lda #$20
+	bit $d011; test hires
+	bne lc1aa
+	lda l028e
+	bmi lc1aa
+	lda #$80
+	sta l028e
+	lda $dd00; adresse berechnen
+	lsr
+	lda $d018
+	and #$70
+	ror
+	tax
+	lda $dd00
+	lsr
+	lsr
+	txa
+	ror
+	eor #$c0
+	sta lb1; hibyte
+	lda #$00
+	sta lb0
+	lda #hcdev
+	jsr $ed0c; listen
+	lda #$60+hcsec; seclisten
+	jsr $edb9
+	lda #13
+	jsr $eddd
+	ldx #25
+lc1e0	ldy #$00
+lc1e2	lda (lb0),y
+	and #$7f
+	cmp #$40
+	bcc lc1f2
+	cmp #$60
+	bcc lc1f0
+	eor #$40
+lc1f0	eor #$80
+lc1f2	cmp #$20
+	bcs lc1f8
+	eor #$40
+lc1f8	jsr $eddd
+	iny
+	cpy #$28
+	bcc lc1e2
+	lda #$0d
+	jsr $eddd
+	tya
+	clc
+	adc lb0
+	sta lb0
+	bcc lc22a
+	inc lb1
+lc22a	dex
+	bne lc1e0
+	jsr $edfe; unlisten
+	jsr $edfe
+	lda #$00
+	sta l028e
+lc1aa	sec
+	rts
 
 ;*******************************
-	PCX2=*
-	*=$EB76
-	JMP HC2
+	pcx2=*
+	*=$eb76
+	jmp hc2
 
-	*=PCX2
-HC2	CPX #4
-	BNE HCE
-	LDA $CB
-	CMP #$39
-	BNE HCE
-	BIT $C6
-	BPL HC
-HCE	JMP $EAE0
-HC	LDA #<-1
-	STA $C6
-	JSR HCOPY
-	LDA #0
-	STA $C6
-	JMP $EB42
+	*=pcx2
+hc2	cpx #4
+	bne hce
+	lda $cb
+	cmp #$39
+	bne hce
+	bit $c6
+	bpl hc
+hce	jmp $eae0
+hc	lda #<-1
+	sta $c6
+	jsr hcopy
+	lda #0
+	sta $c6
+	jmp $eb42
 ;*******************************
 
-BLIRQ	LDX BLNK1
-	BEQ BLXX
-	LDX $D011
-	TXA
-	AND #%11101111
-	LDY BLNK2
-	CPY #255
-	BEQ BLANK
-	TXA
-	AND #%00010000
-	BNE BLXX
-	TXA
-	LDX BC
-	ORA #%00010000
-	.BYT $2C
-BLANK	LDX #0
-	STA $D011
-	STX 53280
-BLXX	JMP $EA34
+blirq	ldx blnk1
+	beq blxx
+	ldx $d011
+	txa
+	and #%11101111
+	ldy blnk2
+	cpy #255
+	beq blank
+	txa
+	and #%00010000
+	bne blxx
+	txa
+	ldx bc
+	ora #%00010000
+	.byt $2c
+blank	ldx #0
+	sta $d011
+	stx 53280
+blxx	jmp $ea34
 
 ;*******************************
-	PCX3=*
-	*=$EA98
-	JMP BLNK
+	pcx3=*
+	*=$ea98
+	jmp blnk
 
-	*=PCX3
-BLNK	BEQ NOTPR
-	TAY
-	LDA BLNKT
-	STA BLNK2
-	JMP $EA9B
-NOTPR	LDA BLNK1
-	BEQ BLE
-	DEC BLNK1
-	BNE BLE
-	LDA #50
-	STA BLNK1
-	LDA BLNK2
-	CMP #255
-	BEQ BLE
-	DEC BLNK2
-BLE	JMP $EB26
+	*=pcx3
+blnk	beq notpr
+	tay
+	lda blnkt
+	sta blnk2
+	jmp $ea9b
+notpr	lda blnk1
+	beq ble
+	dec blnk1
+	bne ble
+	lda #50
+	sta blnk1
+	lda blnk2
+	cmp #255
+	beq ble
+	dec blnk2
+ble	jmp $eb26
 
-	PCX4=*
-	*=$E716
-	JMP BLS
+	pcx4=*
+	*=$e716
+	jmp bls
 
-	*=PCX4
-BLS	PHA
-	STA $D7
-	LDA BLNKT
-	STA BLNK2
-	JMP $E719
-;******** LEERE BEREICHE LOESCHEN
-;FCD1
+	*=pcx4
+bls	pha
+	sta $d7
+	lda blnkt
+	sta blnk2
+	jmp $e719
+;******** leere bereiche loeschen
+;fcd1
 ;*******************************
