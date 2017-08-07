@@ -81,12 +81,18 @@ as a BASIC file and a RUN
 makes them assemble, if you have my assembler in the computer's memory 
 (at $7000).
 
+## Archive descriptions
+Note that the @ASS assembler used has a feature to print out a formatted listing
+during assembly. Open a file for writing, then during the assembly run
+in the .opt pseudo-opcode, redirect output to this opened file descriptor.
+For an example see the Screenshot_assembly.png file
+
 ## Author
 
 This is Copyright A.Fachat, for distributing use my own 
 [License](MYCOPYING.ASC)
 
-### Info: Andre Fachat, fachat@galileo.rhein-neckar.de
+### Info: Andre Fachat, afachat@gmx.de
 
 ### Disclaimer 
   BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
