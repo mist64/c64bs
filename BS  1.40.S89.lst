@@ -1,1 +1,1090 @@
-210110: 0000                   .OPT OO,P111000: 0000          FLAG     =$029811000: 0000          FF       =25511010: 0000          SERI2    =$029B11010: 0000          SERI1    =$029C11020: 0000          SERO2    =$029E11020: 0000          SERO1    =$029D11030: 0000          SERST    =$029711040: 0000          MAP      =$029911050: 0000          BLNKT    =$031311060: 0000          BLNK1    =$02BE11070: 0000          BLNK2    =$02BF11090: 0000          UART     =$D60011091: 0000          RBR      =011091: 0000          THR      =011091: 0000          IER      =111091: 0000          IIR      =211091: 0000          FCR      =211092: 0000          LCR      =311092: 0000          MCR      =411092: 0000          ULSR     =511092: 0000          MSR      =611092: 0000          SCR      =711093: 0000          DLL      =011093: 0000          DLH      =111100: 0000          MIKE     =012000: 0000                   .IF MIKE-112000: 0000                   .GOTO 1260012600: 0000          TPI      =$DF0012610: 0000          BC       =$ECD9            ;            ;********************************            ;--------------------------------            ;AENDERUNGEN AM ROM            ;--------------------------------            ;FARBE FUER CLR/HOME HINTERGRUND20050: E4DA          *=       $E4DA 20050: E4DA AD 86 02           LDA $028620060: EB1C          *=       $EB1C 20060: EB1C A0 03              LDY #3      ; CURSOR SPEED20070: FF7D          *=       $FF7D 20070: FF7D 4C 7E F4           JMP NRESET  ; CLKHI BEI CONT UND RS232 INIT            ;********************************            ;--------------------------------            ;        RS 232 PER ACIA            ;--------------------------------            ; BELEGT     $F014-$F0AC            ;            $F409-$F49D            ;--------------------------------21024: FF80                   .IF MIKE            ;-------OPEN21040: F409          *=       $F40921040: F409           RSOPEN  21050: F409 A0 00             LDY #021050: F40B 8C 97 02          STY SERST21050: F40E C4 B7    RS0      CPY $B721060: F410 F0 0A             BEQ RS121060: F412 B1 BB             LDA ($BB),Y21060: F414 99 93 02          STA $0293,Y21070: F417 C8                INY21070: F418 C0 04             CPY #$0421070: F41A D0 F2             BNE RS021080: F41C AD 93 02 RS1      LDA $029321080: F41F 29 0F             AND #1521080: F421 0A                ASL21080: F422 78                SEI21081: F423 A8                TAY21081: F424 A9 80             LDA #%1000000021081: F426 8D 03 D6          STA UART+LCR21082: F429 B9 E2 FA          LDA DIV,Y21082: F42C 8D 00 D6          STA UART+DLL21083: F42F B9 E3 FA          LDA DIV+1,Y21083: F432 8D 01 D6          STA UART+DLH21084: F435 AD 93 02          LDA $029321084: F438 49 60             EOR #$6021084: F43A 2A                ROL21084: F43B 2A                ROL21084: F43C 2A                ROL21085: F43D 2A                ROL21085: F43E 29 07             AND #%0000011121085: F440 8D 03 D6          STA UART+LCR21085: F443 AD 94 02          LDA $029421085: F446 4A                LSR21085: F447 4A                LSR21086: F448 29 38             AND #%0011100021086: F44A 0D 03 D6          ORA UART+LCR21087: F44D 8D 03 D6          STA UART+LCR21088: F450 A9 07             LDA #721088: F452 8D 02 D6          STA UART+FCR21089: F455 A9 03             LDA #321089: F457 8D 04 D6          STA UART+MCR21089: F45A 8D 01 D6          STA UART+IER21130: F45D A9 00             LDA #021130: F45F 8D A1 02          STA $02A121130: F462 58                CLI21140: F463 20 27 FE          JSR $FE2721140: F466 A5 F8             LDA $F821140: F468 D0 05             BNE RS221140: F46A 88                DEY21150: F46B 84 F8             STY $F821150: F46D 86 F7             STX $F721160: F46F A5 FA    RS2      LDA $FA21160: F471 D0 05             BNE RS321160: F473 88                DEY21170: F474 84 FA             STY $FA21170: F476 86 F9             STX $F921180: F478 38       RS3      SEC21180: F479 A9 F0             LDA #$F021180: F47B 4C 2D FE          JMP $FE2D            ;-------- RESET21200: F47E 20 5D F9 NRESET   JSR FRESET21210: F481 A9 00    RSRESET  LDA #021210: F483 8D 04 D6          STA UART+MCR21215: F486 8D 01 D6          STA UART+IER21215: F489 60                RTS            ;-------- BASIN21230: F48A AD 97 02 RSBASIN  LDA SERST21230: F48D AC 9C 02          LDY SERI121240: F490 CC 9B 02          CPY SERI221240: F493 D0 05             BNE RSBIE221241: F495 09 08             ORA #$0821241: F497 4C 57 FB          JMP RXX1A            ;STA SERST            ;LDA #0            ;RTS21245: F49A 4C 02 FB RSBIE2   JMP RXX121245: F49D EA                NOP            ;F49E            ;-------- CLOSE21350: F2AF          *=       $F2AF21350: F2AF 20 81 F4          JSR RSRESET21360: F2C5          *=       $F2C521360: F2C5 4C 78 F4          JMP RS3            ;-------- CHKIN21380: F227          *=       $F22721380: F227 4C 82 F0          JMP RSCHKIN            ;-------- CHKOUT21400: F26C          *=       $F26C21400: F26C 4C 89 F0          JMP RSCKOUT            ;-------- BSOUT21420: F014          *=       $F01421420: F014 EA                NOP21420: F015 EA                NOP21420: F016 EA                NOP21430: F017 AC 9E 02 RSBSOUT  LDY SERO221430: F01A C8                INY21430: F01B CC 9D 02          CPY SERO121440: F01E F0 F7             BEQ RSBSOUT21440: F020 8C 9E 02          STY SERO221440: F023 88                DEY21450: F024 A5 9E             LDA $9E21450: F026 91 F9             STA ($F9),Y21450: F028 18       CRTS     CLC21450: F029 60                RTS            ;-------- IRQ21470: F02A AD 02 D6 RSIR1    LDA UART+IIR21470: F02D 4A                LSR21470: F02E B0 30             BCS IRQE21472: F030 29 03    INTR     AND #%0000001121472: F032 A8                TAY21472: F033 D0 06             BNE INTTX21473: F035 AD 06 D6          LDA UART+MSR21473: F038 4C 56 F0          JMP CHECKINT21474: F03B 88       INTTX    DEY21474: F03C D0 06             BNE INTRX21475: F03E 20 37 FB          JSR TX221475: F041 4C 56 F0          JMP CHECKINT21476: F044 88       INTRX    DEY21476: F045 D0 0C             BNE INTST21477: F047 20 8D F0 RXLOOP   JSR RX221477: F04A AD 05 D6          LDA UART+ULSR21478: F04D 4A                LSR21478: F04E B0 F7             BCS RXLOOP21478: F050 4C 56 F0          JMP CHECKINT21479: F053 AD 05 D6 INTST    LDA UART+ULSR21480: F056 AD 02 D6 CHECKINT LDA UART+IIR21481: F059 4A                LSR21481: F05A 90 D4             BCC INTR            ;JSR NOBYT21481: F05C EA                NOP21481: F05D EA                NOP21481: F05E EA                NOP21482: F05F 18                CLC21483: F060 08       IRQE     PHP21483: F061 AD 01 D6          LDA UART+IER21483: F064 F0 0C             BEQ NBYT21484: F066 AD 05 D6          LDA UART+ULSR21484: F069 29 40             AND #$4021484: F06B F0 05             BEQ NBYT21485: F06D 20 37 FB          JSR TX2            ;JSR NOBYT21485: F070 EA                NOP21485: F071 EA                NOP21486: F072 28       NBYT     PLP21486: F073 60                RTS21487: F074                   .GOTO 21710            ;----21720: F074          RSIRQ    21730: F074 20 2A F0          JSR RSIR121730: F077 B0 03             BCS RSIR321730: F079 4C 81 EA          JMP $EA8121749: F07C 20 EA FF RSIR3    JSR $FFEA21749: F07F 4C 85 FA          JMP BLIRQ            ;$EA34            ;-------- CHKIN/CKOUT21760: F082 85 99    RSCHKIN  STA $9921760: F084 18                CLC21760: F085 60                RTS21765: F086 4C 8A F4          JMP RSBASIN  ; $F08621770: F089 85 9A    RSCKOUT  STA $9A21770: F08B 18                CLC21770: F08C 60                RTS21772: F08D AD 00 D6 RX2      LDA UART+RBR21775: F090 AC 9B 02          LDY SERI221775: F093 91 F7             STA ($F7),Y21780: F095 C8                INY21780: F096 AD 97 02          LDA SERST21781: F099 CC 9C 02          CPY SERI121781: F09C D0 0A             BNE SI221782: F09E 09 04             ORA #421782: F0A0 4C A5 F0          JMP SI2A21782: F0A3 EA                NOP21782: F0A4 60                RTS21783: F0A5 8D 97 02 SI2A     STA SERST21783: F0A8 8C 9B 02 SI2      STY SERI2            ;----21785: F0AB AD 94 02          LDA $029421785: F0AE 29 01             AND #121785: F0B0 F0 0A             BEQ SI3X21786: F0B2 AD 9C 02          LDA SERI121786: F0B5 38                SEC21786: F0B6 ED 9B 02          SBC SERI221787: F0B9 4C 2A FB          JMP RXX221788: F0BC 60       SI3X     RTS            ;F0BD            ;--------------------------------            ;-------- NMIOUT ADRS21960: ED0E          *=       $ED0E21960: ED0E EA                NOP21960: ED0F EA                NOP21960: ED10 EA                NOP21965: F88A          *=       $F88A21965: F88A EA                NOP21965: F88B EA                NOP21965: F88C EA                NOP            ;-------- NMI-EINSPRUNG LOESCHEN21975: FE54          *=       $FE5421975: FE54 EA                NOP21975: FE55 EA                NOP21980: FE72          *=       $FE7221980: FE72 4C B6 FE          JMP $FEB6            ;-------- IRQ SETZEN21990: EA31          *=       $EA3121990: EA31 4C 74 F0          JMP RSIRQ            ;********************************            ;-------------------------------22010: E1E6          *=       $E1E622010: E1E6 20 C8 EE          JSR LSP      ; LOAD/SAVE IM DIR22020: E1D9          *=       $E1D922020: E1D9 A2 08             LDX #822020: E1DB A0 01             LDY #122020: E1DD 20 BB EE          JSR LSD22030: E5E7          *=       $E5E722030: E5E7 20 D5 EE          JSR KEY      ; F-TASTEN22040: ECE7          *=       $ECE7        ; SHIFT RUN/STOP22050: ECE7 4C CF 22          .BYT "L","Ï",34,"*"22060: E44B          *=       $E44B22060: E44B 7B F9             .WORD NEUBEF ;BASIC-22061: E451          *=       $E45122061: E451 99 EF             .WORD GETAUS ;VEKTOREN22062: EC78          *=       $EC7822062: EC78 84                .BYT $84     ;CTRL INST22063: ECAB          *=       $ECAB22063: ECAB 82                .BYT $82     ;CTRL HOME22064: EC7A          *=       $EC7A22064: EC7A 81                .BYT $81     ;CTRL CRSR RIGHT            ;--------------------------------22100: EEBB          *=       $EEBB22110: EEBB 20 BA FF LSD      JSR $FFBA22110: EEBE AD 98 02 TSTBA    LDA FLAG22115: EEC1 10 11             BPL LSP122115: EEC3 29 0F             AND #1522115: EEC5 85 BA             STA $BA22115: EEC7 60                RTS22120: EEC8 20 79 00 LSP      JSR $007922120: EECB C9 2C             CMP #","22120: EECD F0 05             BEQ LSP122140: EECF 68                PLA22140: EED0 68                PLA22140: EED1 4C F8 A8          JMP $A8F822140: EED4 60       LSP1     RTS22150: EED5 20 B4 E5 KEY      JSR $E5B422150: EED8 24 9D             BIT $9D22150: EEDA 10 F8             BPL LSP122155: EEDC 2C 98 02          BIT FLAG22155: EEDF 10 F3             BPL LSP122160: EEE1 C9 03             CMP #322160: EEE3 D0 0A             BNE KEY222170: EEE5 A2 00    CLR      LDX #022170: EEE7 86 C7             STX $C722170: EEE9 86 D4             STX $D422180: EEEB 86 D8             STX $D822180: EEED F0 E5             BEQ LSP122190: EEEF C9 81    KEY2     CMP #$8122190: EEF1 90 E1             BCC LSP122190: EEF3 D0 16             BNE KEY322191: EEF5 A4 D5             LDY $D522191: EEF7 C8                INY22191: EEF8 88       KL1      DEY22191: EEF9 30 06             BMI KL222192: EEFB B1 D1             LDA ($D1),Y22192: EEFD C9 20             CMP #" "22192: EEFF F0 F7             BEQ KL122193: EF01 84 D3    KL2      STY $D322193: EF03 C4 D5             CPY $D522193: EF05 F0 10             BEQ K3C22194: EF07 E6 D3             INC $D322194: EF09 D0 0C             BNE K3C22200: EF0B C9 82    KEY3     CMP #$8222210: EF0D D0 0E             BNE KEY422210: EF0F A2 18             LDX #2422210: EF11 A0 00             LDY #022210: EF13 18                CLC22211: EF14 20 F0 FF          JSR $FFF022211: EF17 20 E5 EE K3C      JSR CLR22211: EF1A 4C 6C EF          JMP K322220: EF1D C9 84    KEY4     CMP #$8422220: EF1F D0 0F             BNE KEY522230: EF21 A9 20             LDA #" "22230: EF23 A4 D3             LDY $D322230: EF25 C4 D5    K4       CPY $D522231: EF27 F0 02             BEQ K522231: EF29 B0 EC             BCS K3C22232: EF2B 91 D1    K5       STA ($D1),Y22232: EF2D C8                INY22232: EF2E D0 F5             BNE K422240: EF30 C9 8C    KEY5     CMP #14022240: EF32 F0 1E             BEQ K822240: EF34 B0 9E             BCS LSP122250: EF36 C9 89             CMP #13722250: EF38 F0 9A             BEQ LSP122260: EF3A C9 85             CMP #13322260: EF3C 90 96             BCC LSP122270: EF3E E9 85             SBC #13322270: EF40 A8                TAY22270: EF41 BE 71 EF          LDX KEY1,Y22270: EF44 A0 01             LDY #122280: EF46 BD 78 EF K1       LDA KT,X22280: EF49 F0 1F             BEQ K222290: EF4B 99 76 02 KTX      STA $0276,Y22290: EF4E C8                INY22290: EF4F E8                INX22290: EF50 D0 F4             BNE K122300: EF52 A9 40    K8       LDA #"@"22300: EF54 8D 77 02          STA $027722310: EF57 AD 98 02          LDA FLAG22310: EF5A 29 0F             AND #1522310: EF5C 49 01             EOR #122310: EF5E 09 30             ORA #"0"22320: EF60 8D 78 02          STA $027822320: EF63 A9 0D             LDA #1322320: EF65 8D 79 02          STA $027922325: EF68 A0 03             LDY #322330: EF6A 84 C6    K2       STY $C622330: EF6C 68       K3       PLA22330: EF6D 68                PLA22330: EF6E 4C CD E5          JMP $E5CD22340: EF71 00 07 0D KEY1     .BYT 0,KT3-KT,KT5-KT,KT7-KT22350: EF75 FF 19 1C          .BYT <-1,KT4-KT,KT6-KT22360: EF78 93 4C 49 KT       .ASC "“LIST"22360: EF7D 0D 00             .BYT 13,022370: EF7F 52 55 4E KT3      .ASC "RUN:"22370: EF83 0D 00             .BYT 13,022380: EF85 4C 4F 41 KT5      .ASC "LOAD"22380: EF89 0D 00             .BYT 13,022390: EF8B 93 3E 24 KT7      .ASC "“>$0"22390: EF8F 0D 00             .BYT 13,022400: EF91 5F       KT4      .ASC "_"22400: EF92 0D 00             .BYT 13,022410: EF94 53 41 56 KT6      .ASC "SAVE"22410: EF98 00                .BYT 022440: EF99 2C 98 02 GETAUS   BIT FLAG22440: EF9C 30 03             BMI GETOK22441: EF9E 4C 86 AE          JMP $AE8622445: EFA1 A9 00    GETOK    LDA #022445: EFA3 85 0D             STA $0D22450: EFA5 20 73 00          JSR $007322450: EFA8 C9 24             CMP #"$"22450: EFAA F0 23             BEQ GTA122460: EFAC C9 25             CMP #"%"22460: EFAE F0 06             BEQ GTA222460: EFB0 20 79 00          JSR $007922470: EFB3 4C 8D AE          JMP $AE8D22480: EFB6 A9 00    GTA2     LDA #022480: EFB8 85 63             STA $6322480: EFBA 85 62             STA $6222490: EFBC 20 73 00 GTA2A    JSR $007322490: EFBF B0 3C             BCS GTAE22500: EFC1 C9 32             CMP #"2"22500: EFC3 B0 07             BCS GTAERR22510: EFC5 4A                LSR22510: EFC6 26 63             ROL $6322510: EFC8 26 62             ROL $6222510: EFCA 90 F0             BCC GTA2A22520: EFCC 4C 48 B2 GTAERR   JMP $B248    ; ILL. QUANTITY22530: EFCF A9 00    GTA1     LDA #022530: EFD1 85 62             STA $6222530: EFD3 85 63    GTA1A    STA $6322540: EFD5 20 73 00          JSR $007322540: EFD8 38                SEC22540: EFD9 E9 30             SBC #"0"22550: EFDB 90 20             BCC GTAE22550: EFDD C9 0A             CMP #1022550: EFDF 90 0A             BCC GTA1O22560: EFE1 E9 07             SBC #"A"-"9"-122560: EFE3 C9 0A             CMP #1022560: EFE5 90 16             BCC GTAE22570: EFE7 C9 10             CMP #1622570: EFE9 B0 E1             BCS GTAERR22580: EFEB 48       GTA1O    PHA22580: EFEC A0 04             LDY #422580: EFEE          GTA3     22590: EFEE 06 63             ASL $6322590: EFF0 26 62             ROL $6222590: EFF2 B0 D8             BCS GTAERR22600: EFF4 88                DEY22600: EFF5 D0 F7             BNE GTA322600: EFF7 68                PLA22600: EFF8 05 63             ORA $6322610: EFFA 4C D3 EF          JMP GTA1A22620: EFFD A2 90    GTAE     LDX #$9022620: EFFF 38                SEC22620: F000 20 49 BC          JSR $BC4922630: F003 4C 79 00          JMP $0079            ;F014            ;--------------------------------            ;--------------------------------23000: FE75          *=       $FE7523000: FE75          NB1F     23005: FE75 A9 00             LDA #023005: FE77 85 90             STA $9023005: FE79 A5 BA             LDA $BA23005: FE7B 20 B1 FF          JSR $FFB123010: FE7E AD 01 02          LDA $020123010: FE81 C9 24             CMP #"$"23010: FE83 D0 03             BNE NB1C23015: FE85 A9 F0             LDA #$F023015: FE87 2C                .BYT $2C23020: FE88 A9 FF    NB1C     LDA #$FF23020: FE8A 20 93 FF          JSR $FF9323025: FE8D A5 90             LDA $9023025: FE8F 30 45             BMI NBA1E23030: FE91 A0 00             LDY #023030: FE93 B9 01 02 NBA1A    LDA $0201,Y23030: FE96 F0 06             BEQ NB1E23035: FE98 20 A8 FF          JSR $FFA823035: FE9B C8                INY23035: FE9C D0 F5             BNE NBA1A23040: FE9E 20 AE FF NB1E     JSR $FFAE23040: FEA1 A5 90             LDA $9023040: FEA3 D0 31             BNE NBA1E23045: FEA5 A5 BA             LDA $BA23045: FEA7 20 B4 FF          JSR $FFB423050: FEAA AD 01 02          LDA $020123055: FEAD C9 24             CMP #"$"23055: FEAF 4C C2 FE          JMP NB1G            ;FFB6            ;--------------------------------23058: FEC2          *=       $FEC223060: FEC2 F0 17    NB1G     BEQ NB1D23060: FEC4 A9 FF             LDA #$FF23063: FEC6 20 96 FF          JSR $FF9623065: FEC9 20 A5 FF NB1B     JSR $FFA523065: FECC 20 16 E7          JSR $E71623065: FECF A5 90             LDA $9023070: FED1 F0 F6             BEQ NB1B23070: FED3 20 AB FF NBDE     JSR $FFAB23075: FED6 68       NBA1E    PLA23075: FED7 68                PLA23075: FED8 4C 86 E3          JMP $E38623085: FEDB A9 F0    NB1D     LDA #$F023085: FEDD 20 96 FF          JSR $FF9623090: FEE0 20 A5 FF          JSR $FFA523090: FEE3 20 A5 FF          JSR $FFA523095: FEE6 20 A5 FF NBDL     JSR $FFA523095: FEE9 20 A5 FF          JSR $FFA523100: FEEC A6 90             LDX $9023100: FEEE D0 26             BNE EDL323105: FEF0 20 A5 FF          JSR $FFA523105: FEF3 AA                TAX23105: FEF4 20 A5 FF          JSR $FFA523105: FEF7 20 CD BD          JSR $BDCD23110: FEFA 20 A5 FF EDL1     JSR $FFA523110: FEFD A6 90             LDX $9023110: FEFF D0 07             BNE EDL223115: FF01 20 16 E7          JSR $E71623115: FF04 C9 00             CMP #023120: FF06 D0 F2             BNE EDL123125: FF08 A9 0D    EDL2     LDA #1323125: FF0A 20 16 E7          JSR $E71623130: FF0D 20 E4 FF          JSR $FFE423130: FF10 D0 04             BNE EDL323135: FF12 A5 90             LDA $9023135: FF14 F0 D0             BEQ NBDL23135: FF16 20 AB FF EDL3     JSR $FFAB23140: FF19 A5 BA             LDA $BA23140: FF1B 20 B1 FF          JSR $FFB123140: FF1E A9 E0             LDA #$E023145: FF20 20 93 FF          JSR $FF9323145: FF23 20 AE FF          JSR $FFAE23145: FF26 4C D6 FE          JMP NBA1E            ;STA ACIA+123220: FF29 EA                NOP23220: FF2A EA                NOP23220: FF2B EA                NOP23225: FF2C 4C 6E FF          JMP $FF6E            ;FF48            ;******** KASSETTE LOESCHEN *****24000: F5F8          *=       $F5F824000: F5F8 90 F7              BCC $F5F1   ; SAVE24010: F4B6          *=       $F4B624010: F4B6 90 F7              BCC $F4AF   ; LOAD24020: F38B          *=       $F38B24020: F38B 4C 13 F7           JMP $F713   ; OPEN24030: F2C8          *=       $F2C824030: F2C8 4C 13 F7           JMP $F713   ; CLOSE24040: F26F          *=       $F26F24040: F26F 4C 13 F7           JMP $F713   ; CKOUT24050: F225          *=       $F22524050: F225 D0 48              BNE $F26F   ; CHKIN24060: F1E5          *=       $F1E524060: F1E5 38                 SEC24060: F1E6 B0 15             BCS $F1FD    ; BSOUT24070: F179          *=       $F17924070: F179 38                 SEC24070: F17A 60                RTS          ; BASIN            ;******* PARALLELER IEC-BUS *****25000: F17B          Z1       =$9425000: F17B          Z2       =$9525000: F17B          Z4       =$A325000: F17B          Z3       =$028525010: F17B          B1       =$FE1C25010: F17B          B2       =$DC0725010: F17B          B3       =$DC0D25020: F17B          B4       =$DC0F25020: F17B          B5       =TPI25020: F17B          B6       =TPI+125030: F17B          B7       =TPI+325030: F17B          B8       =TPI+425040: F17B          C1       =B525040: F17B          C2       =TPI+225040: F17B          C3       =TPI+325050: F17B          C4       =B825050: F17B          C5       =TPI+525100: FDAB          *=       $FDAB25100: FDAB 20 2C F7           JSR NINI25105: FD50          *=       $FD5025105: FD50 4C 4D F9           JMP NMINI25110: ED0E          *=       $ED0E25110: ED0E 4C B1 F8           JMP NTALK   ; UND LISTEN25120: EDBB          *=       $EDBB25120: EDBB 4C C2 F8           JMP NSECL25130: EDC9          *=       $EDC925130: EDC9 4C D0 F8           JMP NSECT25140: EDDD          *=       $EDDD25140: EDDD 4C DE F8           JMP NOUT25140: EDE0 EA                NOP25150: EDF0          *=       $EDF025150: EDF0 4C F0 F8           JMP NUT25160: EE00          *=       $EE0025160: EE00 4C FE F8           JMP NUL25170: EE13          *=       $EE1325170: EE13 4C 0C F9           JMP NIN25180: F281          *=       $F28125180: F281 20 70 F9           JSR NATNHI25200: F72C          *=       $F72C25205: F72C 8D 00 DC NINI     STA $DC0025210: F72F          IECINI   .IF MIKE-125210: F72F                   .GOTO 2521925219: F72F AD 02 DF          LDA C225219: F732 29 EF             AND # 23925219: F734 8D 02 DF          STA C225220: F737 A0 00             LDY # 025220: F739 8C 04 DF          STY C425220: F73C A9 3A             LDA # 5825230: F73E 8D 00 DF          STA C125230: F741 A9 3F             LDA # 6325230: F743 8D 03 DF          STA C325240: F746 AD 02 DF          LDA C225240: F749 29 FE             AND # 25425240: F74B 8D 02 DF          STA C225250: F74E A0 FF             LDY # 25525250: F750 88       L0       DEY 25250: F751 EA                NOP25260: F752 D0 FC             BNE L025260: F754 AD 02 DF          LDA C225260: F757 09 01             ORA # 125270: F759 8D 02 DF          STA C225270: F75C A9 39             LDA # 5725270: F75E 8D 00 DF          STA C125280: F761 4C AE FD          JMP $FDAE            ;RTS            ;*****25300: F764 09 40    IECTALK  ORA # 6425300: F766 2C                .BYT $2C25310: F767 09 20    IECLISTEN ORA # 3225320: F769 48       IECTL L1 PHA 25320: F76A A9 3B             LDA # 5925320: F76C 8D 03 DF          STA B725330: F76F A9 FF             LDA # 25525330: F771 8D 01 DF          STA B625330: F774 8D 04 DF          STA B825340: F777 A9 FA             LDA # 25025340: F779 8D 00 DF          STA B525340: F77C A5 94             LDA Z125350: F77E 10 1B             BPL L225350: F780 AD 00 DF          LDA B525350: F783 29 DF             AND # 22325360: F785 8D 00 DF          STA B525360: F788 A5 95             LDA Z225360: F78A 20 F5 F7          JSR L725370: F78D A5 94             LDA Z125370: F78F 29 7F             AND # 12725370: F791 85 94             STA Z125380: F793 AD 00 DF          LDA B525380: F796 09 20             ORA # 3225380: F798 8D 00 DF          STA B525390: F79B AD 00 DF L2       LDA B525390: F79E 29 F7             AND # 24725390: F7A0 8D 00 DF          STA B525400: F7A3 68                PLA 25400: F7A4 4C F5 F7          JMP L725400: F7A7 20 F5 F7 SECLISTEN JSR L725410: F7AA AD 00 DF L3       LDA B525410: F7AD 09 08             ORA # 825410: F7AF 8D 00 DF          STA B525420: F7B2 60                RTS25430: F7B3 20 F5 F7 SECTALK  JSR L725430: F7B6 A9 3D    L4       LDA # 6125440: F7B8 2D 00 DF          AND B525440: F7BB 8D 00 DF          STA B525440: F7BE A9 C3             LDA # 19525450: F7C0 8D 03 DF          STA B725450: F7C3 A9 00             LDA # 025450: F7C5 8D 04 DF          STA B825460: F7C8 F0 E0             BEQ L325460: F7CA 48       IECOUT   PHA 25460: F7CB A5 94             LDA Z125470: F7CD 10 07             BPL L525470: F7CF A5 95             LDA Z225470: F7D1 20 F5 F7          JSR L725480: F7D4 A5 94             LDA Z125480: F7D6 09 80    L5       ORA # 12825480: F7D8 85 94             STA Z125490: F7DA 68                PLA 25490: F7DB 85 95             STA Z225490: F7DD 18                CLC 25500: F7DE 60                RTS 25500: F7DF A9 5F    UNTALK   LDA # 9525500: F7E1 D0 02             BNE L625510: F7E3 A9 3F    UNLISTEN LDA # 6325510: F7E5 20 69 F7 L6       JSR L125510: F7E8 20 B6 F7          JSR L425520: F7EB A9 FD             LDA # 25325520: F7ED 0D 00 DF          ORA B525520: F7F0 8D 00 DF          STA B525520: F7F3 58                CLI25530: F7F4 60                RTS 25530: F7F5 49 FF    L7       EOR # 25525530: F7F7 8D 01 DF          STA B625540: F7FA AD 00 DF          LDA B525540: F7FD 09 12             ORA # 1825540: F7FF 8D 00 DF          STA B525550: F802 2C 00 DF          BIT B525550: F805 50 09             BVC L825550: F807 10 07             BPL L825560: F809 A9 80             LDA # 12825560: F80B 20 1C FE          JSR B125560: F80E D0 2B             BNE L1225570: F810 AD 00 DF L8       LDA B525570: F813 10 FB             BPL L825570: F815 29 EF             AND # 23925580: F817 8D 00 DF          STA B525580: F81A 20 A3 F8 L9       JSR L1825580: F81D 2C 00 DF L10      BIT B525590: F820 70 11             BVS L1125590: F822 AD 0D DC          LDA B325590: F825 29 02             AND # 225600: F827 F0 F4             BEQ L1025600: F829 AD 85 02          LDA Z325600: F82C 30 EC             BMI L925610: F82E A9 01             LDA # 125610: F830 20 1C FE          JSR B125610: F833 AD 00 DF L11      LDA B525620: F836 09 10             ORA # 1625620: F838 8D 00 DF          STA B525620: F83B A9 FF    L12      LDA # 25525630: F83D 8D 01 DF          STA B625630: F840 60                RTS 25630: F841 AD 00 DF IECIN    LDA B525640: F844 29 BD             AND # 18925640: F846 09 81             ORA # 12925640: F848 8D 00 DF          STA B525650: F84B 20 A3 F8 L13      JSR L1825650: F84E AD 00 DF L14      LDA B525650: F851 29 10             AND # 1625660: F853 F0 1D             BEQ L1525660: F855 AD 0D DC          LDA B325660: F858 29 02             AND # 225670: F85A F0 F2             BEQ L1425670: F85C AD 85 02          LDA Z325670: F85F 30 EA             BMI L1325680: F861 A9 02             LDA # 225680: F863 20 1C FE          JSR B125680: F866 AD 00 DF          LDA B525690: F869 29 3D             AND # 6125690: F86B 8D 00 DF          STA B525690: F86E A9 0D             LDA # 1325700: F870 18                CLC 25700: F871 60                RTS 25700: F872 AD 00 DF L15      LDA B525710: F875 29 7F             AND # 12725710: F877 8D 00 DF          STA B525710: F87A 29 20             AND # 3225720: F87C D0 05             BNE L1625720: F87E A9 40             LDA # 6425720: F880 20 1C FE          JSR B125730: F883 AD 01 DF L16      LDA B625730: F886 49 FF             EOR # 25525730: F888 48                PHA 25740: F889 AD 00 DF          LDA B525740: F88C 09 40             ORA # 6425740: F88E 8D 00 DF          STA B525750: F891 AD 00 DF L17      LDA B525750: F894 29 10             AND # 1625750: F896 F0 F9             BEQ L1725760: F898 AD 00 DF          LDA B525760: F89B 29 BF             AND # 19125760: F89D 8D 00 DF          STA B525770: F8A0 68                PLA 25770: F8A1 18                CLC 25770: F8A2 60                RTS 25780: F8A3 A9 FF    L18      LDA # 25525780: F8A5 8D 07 DC          STA B225780: F8A8 A9 11             LDA # 1725790: F8AA 8D 0F DC          STA B425790: F8AD AD 0D DC          LDA B325790: F8B0 60                RTS            ;**** EINBINDUNG25830: F8B1 20 1A F9 NTALK    JSR SETDEV25840: F8B4 2C 99 02          BIT MAP25840: F8B7 10 03             BPL OTL25840: F8B9 4C 69 F7          JMP IECTL25850: F8BC 20 A4 F0 OTL      JSR $F0A425850: F8BF 4C 11 ED          JMP $ED1125860: F8C2 2C 99 02 NSECL    BIT MAP25860: F8C5 10 03             BPL OSL25860: F8C7 4C A7 F7          JMP SECLISTEN25870: F8CA 20 36 ED OSL      JSR $ED3625870: F8CD 4C BE ED          JMP $EDBE25880: F8D0 2C 99 02 NSECT    BIT MAP25880: F8D3 10 03             BPL OST25880: F8D5 4C B3 F7          JMP SECTALK25890: F8D8 20 36 ED OST      JSR $ED3625890: F8DB 4C CC ED          JMP $EDCC25900: F8DE 2C 99 02 NOUT     BIT MAP25900: F8E1 10 03             BPL OOUT25900: F8E3 4C CA F7          JMP IECOUT25910: F8E6 24 94    OOUT     BIT $9425910: F8E8 30 03             BMI OOUT125910: F8EA 4C E1 ED          JMP $EDE125920: F8ED 4C E6 ED OOUT1    JMP $EDE625930: F8F0 2C 99 02 NUT      BIT MAP25930: F8F3 10 03             BPL OUT25930: F8F5 4C DF F7          JMP UNTALK25940: F8F8 20 8E EE OUT      JSR $EE8E25940: F8FB 4C F3 ED          JMP $EDF325950: F8FE 2C 99 02 NUL      BIT MAP25950: F901 10 03             BPL OUL25950: F903 4C E3 F7          JMP UNLISTEN25960: F906 20 11 ED OUL      JSR $ED1125960: F909 4C 03 EE          JMP $EE0325970: F90C 2C 99 02 NIN      BIT MAP25970: F90F 10 03             BPL OIN25970: F911 4C 41 F8          JMP IECIN25980: F914 78       OIN      SEI25980: F915 A9 00             LDA #025980: F917 4C 16 EE          JMP $EE1625990: F91A 48       SETDEV   PHA25990: F91B 84 A3             STY Z426000: F91D 29 0F             AND #1526000: F91F 38                SEC26000: F920 E9 04             SBC #426000: F922 90 1B             BCC PIEC26010: F924 C9 07             CMP #726010: F926 B0 0D             BCS SIEC1    ;PIEC26010: F928 A8                TAY26020: F929 B9 46 F9          LDA POT2,Y26020: F92C A4 A3             LDY Z426020: F92E 46 A3             LSR Z426020: F930 2D 99 02          AND MAP26020: F933 F0 0A             BEQ PIEC26030: F935 AD 99 02 SIEC1    LDA MAP26030: F938 29 7F             AND #12726030: F93A 8D 99 02 SIEC     STA MAP26030: F93D 68                PLA26030: F93E 60                RTS26040: F93F          PIEC     26050: F93F AD 99 02          LDA MAP26050: F942 09 80             ORA #12826050: F944 D0 F4             BNE SIEC26060: F946 01 02 04 POT2     .BYT 1,2,4,8,$10,$20,$4026070: F94D A9 00    NMINI    LDA #026070: F94F A8                TAY26070: F950 20 53 FD          JSR $FD5326080: F953                   .IF MIKE26085: F953 A9 80             LDA #%1000000026090: F955 8D 99 02          STA MAP26100: F958 A9 80             LDA #12826100: F95A 8D 8A 02          STA 65026110: F95D A9 88    FRESET   LDA #8+12826110: F95F 8D 98 02          STA FLAG26115: F962 A9 B4             LDA #18026115: F964 8D BF 02          STA BLNK226115: F967 8D 13 03          STA BLNKT26116: F96A                   .IF MIKE26117: F96A A9 00             LDA #026120: F96C 8D BE 02          STA BLNK126120: F96F 60                RTS26200: F970 2C 99 02 NATNHI   BIT MAP26200: F973 10 03             BPL OAH26200: F975 4C AA F7          JMP L326210: F978 4C BE ED OAH      JMP $EDBE            ;***** WAS NICHT MIT KASSETE GEHT27000: F97B 2C 98 02 NEUBEF   BIT FLAG27000: F97E 10 16             BPL NEUEND27005: F980 20 BE EE          JSR TSTBA27005: F983 AD 00 02          LDA $020027010: F986 C9 40             CMP #"@"27010: F988 F0 2A             BEQ NBA127010: F98A C9 3E             CMP #">"27020: F98C F0 26             BEQ NBA127020: F98E C9 21             CMP #"!"27020: F990 F0 07             BEQ NBA227030: F992 C9 5F             CMP #"_"27030: F994 F0 2F             BEQ SYSOFF27035: F996 4C 7C A5 NEUEND   JMP $A57C27040: F999 A9 01    NBA2     LDA #127040: F99B A8                TAY27040: F99C 91 2B             STA ($2B),Y27050: F99E 20 33 A5          JSR $A53327050: F9A1 A5 22             LDA $2227050: F9A3 18                CLC27050: F9A4 69 02             ADC #227060: F9A6 85 2D             STA $2D27060: F9A8 A5 23             LDA $2327060: F9AA 69 00             ADC #027060: F9AC 85 2E             STA $2E27070: F9AE 20 63 A6          JSR $A66327070: F9B1 4C 86 E3          JMP $E38627080: F9B4 20 73 00 NBA1     JSR $007327080: F9B7 90 03             BCC NBZ127080: F9B9 4C 75 FE          JMP NB1F27090: F9BC 20 9E B7 NBZ1     JSR $B79E27090: F9BF 8A                TXA27090: F9C0 29 0F             AND #1527100: F9C2 09 80             ORA #12827100: F9C4 2C                .BYT $2C27105: F9C5 A9 00    SYSOFF   LDA #027110: F9C7 8D 98 02 NBA1EX   STA FLAG27110: F9CA 4C D6 FE          JMP NBA1E            ;*******************************            ;***** SCROLL-HALT28005: F9CD          PCX1     =*28005: E940          *=       $E94028010: E940 49 24             EOR #%0010010028010: E942 29 24             AND #%0010010028020: E944 F0 10             BEQ $E95628020: E946 4C CD F9          JMP PCX128020: E949 EA                NOP28020: E94A EA                NOP28030: F9CD          *=       PCX128040: F9CD C9 04             CMP #%0000010028040: F9CF F0 07             BEQ S1       ;CTRL LANGSAM28050: F9D1 C9 20             CMP #%0010000028050: F9D3 D0 06             BNE S2       ;CTRL/CBM STOP            ;JSR TESTHCOPY                 ;NUR CBM28060: F9D5 4C 38 E9 S0       JMP $E93828060: F9D8 4C 4B E9 S1       JMP $E94B28070: F9DB AD 01 DC S2       LDA $DC0128070: F9DE C9 FF             CMP #$FF28070: F9E0 D0 F9             BNE S228080: F9E2 AD 01 DC S3       LDA $DC0128080: F9E5 29 20             AND #$2028080: F9E7 D0 F9             BNE S328090: F9E9 F0 EA             BEQ S0            ;********************************28105: F9EB                   .GOTO 28200            ;********************************28210: F9EB          LB0      =$B028210: F9EB          LB1      =LB0+128220: F9EB          L028E    =$028E28230: F9EB          HCDEV    =428230: F9EB          HCSEC    =728240: F9EB          HCOPY                 ;INC 5328028245: F9EB A9 20             LDA #$2028245: F9ED 2C 11 D0          BIT $D011    ; TEST HIRES28250: F9F0 D0 72             BNE LC1AA28260: F9F2 AD 8E 02          LDA L028E28260: F9F5 30 6D             BMI LC1AA28270: F9F7 A9 80             LDA #$8028270: F9F9 8D 8E 02          STA L028E28280: F9FC AD 00 DD          LDA $DD00    ; ADRESSE BERECHNEN28290: F9FF 4A                LSR 28290: FA00 AD 18 D0          LDA $D01828300: FA03 29 70             AND #$7028300: FA05 6A                ROR 28310: FA06 AA                TAX 28310: FA07 AD 00 DD          LDA $DD0028320: FA0A 4A                LSR 28320: FA0B 4A                LSR 28330: FA0C 8A                TXA 28330: FA0D 6A                ROR 28340: FA0E 49 C0             EOR #$C028340: FA10 85 B1             STA LB1      ; HIBYTE28350: FA12 A9 00             LDA #$0028350: FA14 85 B0             STA LB028360: FA16 A9 04             LDA #HCDEV28360: FA18 20 0C ED          JSR $ED0C    ; LISTEN28370: FA1B A9 67             LDA #$60+HCSEC; SECLISTEN28380: FA1D 20 B9 ED          JSR $EDB928380: FA20 A9 0D             LDA #1328380: FA22 20 DD ED          JSR $EDDD28390: FA25 A2 19             LDX #2528400: FA27 A0 00    LC1E0    LDY #$0028400: FA29 B1 B0    LC1E2    LDA (LB0),Y28410: FA2B 29 7F             AND #$7F28410: FA2D C9 40             CMP #$4028420: FA2F 90 08             BCC LC1F228420: FA31 C9 60             CMP #$6028430: FA33 90 02             BCC LC1F028430: FA35 49 40             EOR #$4028440: FA37 49 80    LC1F0    EOR #$8028440: FA39 C9 20    LC1F2    CMP #$2028450: FA3B B0 02             BCS LC1F828450: FA3D 49 40             EOR #$4028460: FA3F 20 DD ED LC1F8    JSR $EDDD28460: FA42 C8                INY28470: FA43 C0 28             CPY #$2828470: FA45 90 E2             BCC LC1E228480: FA47 A9 0D             LDA #$0D28480: FA49 20 DD ED          JSR $EDDD28490: FA4C 98                TYA 28490: FA4D 18                CLC 28500: FA4E 65 B0             ADC LB028500: FA50 85 B0             STA LB028510: FA52 90 02             BCC LC22A28520: FA54 E6 B1             INC LB128520: FA56 CA       LC22A    DEX28530: FA57 D0 CE             BNE LC1E028530: FA59 20 FE ED          JSR $EDFE    ; UNLISTEN28540: FA5C 20 FE ED          JSR $EDFE28550: FA5F A9 00             LDA #$0028550: FA61 8D 8E 02          STA L028E28560: FA64 38       LC1AA    SEC28560: FA65 60                RTS            ;*******************************28600: FA66          PCX2     =*28600: EB76          *=       $EB7628610: EB76 4C 66 FA          JMP HC228610: FA66          *=       PCX228620: FA66 E0 04    HC2      CPX #428620: FA68 D0 0A             BNE HCE28630: FA6A A5 CB             LDA $CB28630: FA6C C9 39             CMP #$3928630: FA6E D0 04             BNE HCE28640: FA70 24 C6             BIT $C628640: FA72 10 03             BPL HC28640: FA74 4C E0 EA HCE      JMP $EAE028650: FA77 A9 FF    HC       LDA #<-128650: FA79 85 C6             STA $C628660: FA7B 20 EB F9          JSR HCOPY28660: FA7E A9 00             LDA #028660: FA80 85 C6             STA $C628665: FA82 4C 42 EB          JMP $EB42            ;*******************************28670: FA85          BLIRQ    28670: FA85 AE BE 02          LDX BLNK128670: FA88 F0 21             BEQ BLXX28675: FA8A AE 11 D0          LDX $D01128675: FA8D 8A                TXA28675: FA8E 29 EF             AND #%1110111128680: FA90 AC BF 02          LDY BLNK228680: FA93 C0 FF             CPY #25528680: FA95 F0 0C             BEQ BLANK28681: FA97 8A                TXA28681: FA98 29 10             AND #%0001000028681: FA9A D0 0F             BNE BLXX28684: FA9C 8A                TXA28684: FA9D AE D9 EC          LDX BC28685: FAA0 09 10             ORA #%0001000028685: FAA2 2C                .BYT $2C28685: FAA3 A2 00    BLANK    LDX #028685: FAA5 8D 11 D0          STA $D01128685: FAA8 8E 20 D0          STX 5328028690: FAAB 4C 34 EA BLXX     JMP $EA34            ;*******************************28700: FAAE          PCX3     =*28700: EA98          *=       $EA9828710: EA98 4C AE FA          JMP BLNK28710: FAAE          *=       PCX328730: FAAE F0 0A    BLNK     BEQ NOTPR28740: FAB0 A8                TAY28740: FAB1 AD 13 03          LDA BLNKT28740: FAB4 8D BF 02          STA BLNK228750: FAB7 4C 9B EA          JMP $EA9B28760: FABA AD BE 02 NOTPR    LDA BLNK128760: FABD F0 14             BEQ BLE28760: FABF CE BE 02          DEC BLNK128770: FAC2 D0 0F             BNE BLE28770: FAC4 A9 32             LDA #5028770: FAC6 8D BE 02          STA BLNK128780: FAC9 AD BF 02          LDA BLNK228780: FACC C9 FF             CMP #25528780: FACE F0 03             BEQ BLE28780: FAD0 CE BF 02          DEC BLNK228790: FAD3 4C 26 EB BLE      JMP $EB2628791: FAD6          PCX4     =*28791: E716          *=       $E71628792: E716 4C D6 FA          JMP BLS28792: FAD6          *=       PCX428793: FAD6 48       BLS      PHA28793: FAD7 85 D7             STA $D728793: FAD9 AD 13 03          LDA BLNKT28793: FADC 8D BF 02          STA BLNK228793: FADF 4C 19 E7          JMP $E719            ;******** LEERE BEREICHE LOESCHEN            ;FCD130000: FAE2 FF FF 00 DIV      .WORD -1, 2304, 1536, 104730001: FAEA 59 03 00          .WORD 857, 768, 384, 192, 9630002: FAF4 40 00 30          .WORD 64, 48, 32, 24, 16, 12, 630100: FB02 25 7F    RXX1     AND $7F30100: FB04 8D 97 02          STA SERST30100: FB07 B1 F7             LDA ($F7),Y30110: FB09 EE 9C 02          INC SERI130110: FB0C 48                PHA30120: FB0D AD 94 02          LDA $029430120: FB10 29 01             AND #130120: FB12 F0 13             BEQ RSBI130130: FB14 AD 9C 02          LDA SERI130130: FB17 38                SEC30130: FB18 ED 9B 02          SBC SERI230140: FB1B C9 C0             CMP #$C030140: FB1D 90 08             BCC RSBI130150: FB1F AD 04 D6          LDA UART+MCR30150: FB22 09 02             ORA #%0000001030160: FB24 8D 04 D6          STA UART+MCR30170: FB27 68       RSBI1    PLA30170: FB28 18                CLC30170: FB29 60                RTS30200: FB2A C9 40    RXX2     CMP #$4030200: FB2C B0 08             BCS SI3      ;30210: FB2E AD 04 D6          LDA UART+MCR30210: FB31 29 FD             AND #%1111110130220: FB33 8D 04 D6          STA UART+MCR30230: FB36 60       SI3      RTS30300: FB37 AD 06 D6 TX2      LDA UART+MSR30300: FB3A 29 30             AND #%0011000030310: FB3C C9 30             CMP #%0011000030310: FB3E D0 16             BNE TXRT30320: FB40 A2 0F             LDX #1530330: FB42 AC 9D 02 TXLOOP   LDY SERO130330: FB45 CC 9E 02          CPY SERO230340: FB48 F0 0C             BEQ SI630340: FB4A B1 F9             LDA ($F9),Y30350: FB4C 8D 00 D6          STA UART+THR30351: FB4F C8                INY30351: FB50 8C 9D 02          STY SERO130355: FB53 CA                DEX30355: FB54 D0 EC             BNE TXLOOP30360: FB56          SI6      30360: FB56          TXRT     30360: FB56 60       NOBYT    RTS30400: FB57 8D 97 02 RXX1A    STA SERST30400: FB5A A9 00             LDA #030400: FB5C 60                RTS            ;*******************************50000: FB5D                   .END]E4DA-FB5D
+2
+10110: 0000                   .OPT OO,P1
+11000: 0000          FLAG     =$0298
+11000: 0000          FF       =255
+11010: 0000          SERI2    =$029B
+11010: 0000          SERI1    =$029C
+11020: 0000          SERO2    =$029E
+11020: 0000          SERO1    =$029D
+11030: 0000          SERST    =$0297
+11040: 0000          MAP      =$0299
+11050: 0000          BLNKT    =$0313
+11060: 0000          BLNK1    =$02BE
+11070: 0000          BLNK2    =$02BF
+11090: 0000          UART     =$D600
+11091: 0000          RBR      =0
+11091: 0000          THR      =0
+11091: 0000          IER      =1
+11091: 0000          IIR      =2
+11091: 0000          FCR      =2
+11092: 0000          LCR      =3
+11092: 0000          MCR      =4
+11092: 0000          ULSR     =5
+11092: 0000          MSR      =6
+11092: 0000          SCR      =7
+11093: 0000          DLL      =0
+11093: 0000          DLH      =1
+11100: 0000          MIKE     =0
+12000: 0000                   .IF MIKE-1
+12000: 0000                   .GOTO 12600
+12600: 0000          TPI      =$DF00
+12610: 0000          BC       =$ECD9
+            ;
+            ;********************************
+            ;--------------------------------
+            ;AENDERUNGEN AM ROM
+            ;--------------------------------
+            ;FARBE FUER CLR/HOME HINTERGRUND
+20050: E4DA          *=       $E4DA 
+20050: E4DA AD 86 02           LDA $0286
+20060: EB1C          *=       $EB1C 
+20060: EB1C A0 03              LDY #3      ; CURSOR SPEED
+20070: FF7D          *=       $FF7D 
+20070: FF7D 4C 7E F4           JMP NRESET  ; CLKHI BEI CONT UND RS232 INIT
+            ;********************************
+            ;--------------------------------
+            ;        RS 232 PER ACIA
+            ;--------------------------------
+            ; BELEGT     $F014-$F0AC
+            ;            $F409-$F49D
+            ;--------------------------------
+21024: FF80                   .IF MIKE
+            ;-------OPEN
+21040: F409          *=       $F409
+21040: F409           RSOPEN  
+21050: F409 A0 00             LDY #0
+21050: F40B 8C 97 02          STY SERST
+21050: F40E C4 B7    RS0      CPY $B7
+21060: F410 F0 0A             BEQ RS1
+21060: F412 B1 BB             LDA ($BB),Y
+21060: F414 99 93 02          STA $0293,Y
+21070: F417 C8                INY
+21070: F418 C0 04             CPY #$04
+21070: F41A D0 F2             BNE RS0
+21080: F41C AD 93 02 RS1      LDA $0293
+21080: F41F 29 0F             AND #15
+21080: F421 0A                ASL
+21080: F422 78                SEI
+21081: F423 A8                TAY
+21081: F424 A9 80             LDA #%10000000
+21081: F426 8D 03 D6          STA UART+LCR
+21082: F429 B9 E2 FA          LDA DIV,Y
+21082: F42C 8D 00 D6          STA UART+DLL
+21083: F42F B9 E3 FA          LDA DIV+1,Y
+21083: F432 8D 01 D6          STA UART+DLH
+21084: F435 AD 93 02          LDA $0293
+21084: F438 49 60             EOR #$60
+21084: F43A 2A                ROL
+21084: F43B 2A                ROL
+21084: F43C 2A                ROL
+21085: F43D 2A                ROL
+21085: F43E 29 07             AND #%00000111
+21085: F440 8D 03 D6          STA UART+LCR
+21085: F443 AD 94 02          LDA $0294
+21085: F446 4A                LSR
+21085: F447 4A                LSR
+21086: F448 29 38             AND #%00111000
+21086: F44A 0D 03 D6          ORA UART+LCR
+21087: F44D 8D 03 D6          STA UART+LCR
+21088: F450 A9 07             LDA #7
+21088: F452 8D 02 D6          STA UART+FCR
+21089: F455 A9 03             LDA #3
+21089: F457 8D 04 D6          STA UART+MCR
+21089: F45A 8D 01 D6          STA UART+IER
+21130: F45D A9 00             LDA #0
+21130: F45F 8D A1 02          STA $02A1
+21130: F462 58                CLI
+21140: F463 20 27 FE          JSR $FE27
+21140: F466 A5 F8             LDA $F8
+21140: F468 D0 05             BNE RS2
+21140: F46A 88                DEY
+21150: F46B 84 F8             STY $F8
+21150: F46D 86 F7             STX $F7
+21160: F46F A5 FA    RS2      LDA $FA
+21160: F471 D0 05             BNE RS3
+21160: F473 88                DEY
+21170: F474 84 FA             STY $FA
+21170: F476 86 F9             STX $F9
+21180: F478 38       RS3      SEC
+21180: F479 A9 F0             LDA #$F0
+21180: F47B 4C 2D FE          JMP $FE2D
+            ;-------- RESET
+21200: F47E 20 5D F9 NRESET   JSR FRESET
+21210: F481 A9 00    RSRESET  LDA #0
+21210: F483 8D 04 D6          STA UART+MCR
+21215: F486 8D 01 D6          STA UART+IER
+21215: F489 60                RTS
+            ;-------- BASIN
+21230: F48A AD 97 02 RSBASIN  LDA SERST
+21230: F48D AC 9C 02          LDY SERI1
+21240: F490 CC 9B 02          CPY SERI2
+21240: F493 D0 05             BNE RSBIE2
+21241: F495 09 08             ORA #$08
+21241: F497 4C 57 FB          JMP RXX1A
+            ;STA SERST
+            ;LDA #0
+            ;RTS
+21245: F49A 4C 02 FB RSBIE2   JMP RXX1
+21245: F49D EA                NOP
+            ;F49E
+            ;-------- CLOSE
+21350: F2AF          *=       $F2AF
+21350: F2AF 20 81 F4          JSR RSRESET
+21360: F2C5          *=       $F2C5
+21360: F2C5 4C 78 F4          JMP RS3
+            ;-------- CHKIN
+21380: F227          *=       $F227
+21380: F227 4C 82 F0          JMP RSCHKIN
+            ;-------- CHKOUT
+21400: F26C          *=       $F26C
+21400: F26C 4C 89 F0          JMP RSCKOUT
+            ;-------- BSOUT
+21420: F014          *=       $F014
+21420: F014 EA                NOP
+21420: F015 EA                NOP
+21420: F016 EA                NOP
+21430: F017 AC 9E 02 RSBSOUT  LDY SERO2
+21430: F01A C8                INY
+21430: F01B CC 9D 02          CPY SERO1
+21440: F01E F0 F7             BEQ RSBSOUT
+21440: F020 8C 9E 02          STY SERO2
+21440: F023 88                DEY
+21450: F024 A5 9E             LDA $9E
+21450: F026 91 F9             STA ($F9),Y
+21450: F028 18       CRTS     CLC
+21450: F029 60                RTS
+            ;-------- IRQ
+21470: F02A AD 02 D6 RSIR1    LDA UART+IIR
+21470: F02D 4A                LSR
+21470: F02E B0 30             BCS IRQE
+21472: F030 29 03    INTR     AND #%00000011
+21472: F032 A8                TAY
+21472: F033 D0 06             BNE INTTX
+21473: F035 AD 06 D6          LDA UART+MSR
+21473: F038 4C 56 F0          JMP CHECKINT
+21474: F03B 88       INTTX    DEY
+21474: F03C D0 06             BNE INTRX
+21475: F03E 20 37 FB          JSR TX2
+21475: F041 4C 56 F0          JMP CHECKINT
+21476: F044 88       INTRX    DEY
+21476: F045 D0 0C             BNE INTST
+21477: F047 20 8D F0 RXLOOP   JSR RX2
+21477: F04A AD 05 D6          LDA UART+ULSR
+21478: F04D 4A                LSR
+21478: F04E B0 F7             BCS RXLOOP
+21478: F050 4C 56 F0          JMP CHECKINT
+21479: F053 AD 05 D6 INTST    LDA UART+ULSR
+21480: F056 AD 02 D6 CHECKINT LDA UART+IIR
+21481: F059 4A                LSR
+21481: F05A 90 D4             BCC INTR
+            ;JSR NOBYT
+21481: F05C EA                NOP
+21481: F05D EA                NOP
+21481: F05E EA                NOP
+21482: F05F 18                CLC
+21483: F060 08       IRQE     PHP
+21483: F061 AD 01 D6          LDA UART+IER
+21483: F064 F0 0C             BEQ NBYT
+21484: F066 AD 05 D6          LDA UART+ULSR
+21484: F069 29 40             AND #$40
+21484: F06B F0 05             BEQ NBYT
+21485: F06D 20 37 FB          JSR TX2
+            ;JSR NOBYT
+21485: F070 EA                NOP
+21485: F071 EA                NOP
+21486: F072 28       NBYT     PLP
+21486: F073 60                RTS
+21487: F074                   .GOTO 21710
+            ;----
+21720: F074          RSIRQ    
+21730: F074 20 2A F0          JSR RSIR1
+21730: F077 B0 03             BCS RSIR3
+21730: F079 4C 81 EA          JMP $EA81
+21749: F07C 20 EA FF RSIR3    JSR $FFEA
+21749: F07F 4C 85 FA          JMP BLIRQ
+            ;$EA34
+            ;-------- CHKIN/CKOUT
+21760: F082 85 99    RSCHKIN  STA $99
+21760: F084 18                CLC
+21760: F085 60                RTS
+21765: F086 4C 8A F4          JMP RSBASIN  ; $F086
+21770: F089 85 9A    RSCKOUT  STA $9A
+21770: F08B 18                CLC
+21770: F08C 60                RTS
+21772: F08D AD 00 D6 RX2      LDA UART+RBR
+21775: F090 AC 9B 02          LDY SERI2
+21775: F093 91 F7             STA ($F7),Y
+21780: F095 C8                INY
+21780: F096 AD 97 02          LDA SERST
+21781: F099 CC 9C 02          CPY SERI1
+21781: F09C D0 0A             BNE SI2
+21782: F09E 09 04             ORA #4
+21782: F0A0 4C A5 F0          JMP SI2A
+21782: F0A3 EA                NOP
+21782: F0A4 60                RTS
+21783: F0A5 8D 97 02 SI2A     STA SERST
+21783: F0A8 8C 9B 02 SI2      STY SERI2
+            ;----
+21785: F0AB AD 94 02          LDA $0294
+21785: F0AE 29 01             AND #1
+21785: F0B0 F0 0A             BEQ SI3X
+21786: F0B2 AD 9C 02          LDA SERI1
+21786: F0B5 38                SEC
+21786: F0B6 ED 9B 02          SBC SERI2
+21787: F0B9 4C 2A FB          JMP RXX2
+21788: F0BC 60       SI3X     RTS
+            ;F0BD
+            ;--------------------------------
+            ;-------- NMIOUT ADRS
+21960: ED0E          *=       $ED0E
+21960: ED0E EA                NOP
+21960: ED0F EA                NOP
+21960: ED10 EA                NOP
+21965: F88A          *=       $F88A
+21965: F88A EA                NOP
+21965: F88B EA                NOP
+21965: F88C EA                NOP
+            ;-------- NMI-EINSPRUNG LOESCHEN
+21975: FE54          *=       $FE54
+21975: FE54 EA                NOP
+21975: FE55 EA                NOP
+21980: FE72          *=       $FE72
+21980: FE72 4C B6 FE          JMP $FEB6
+            ;-------- IRQ SETZEN
+21990: EA31          *=       $EA31
+21990: EA31 4C 74 F0          JMP RSIRQ
+            ;********************************
+            ;-------------------------------
+22010: E1E6          *=       $E1E6
+22010: E1E6 20 C8 EE          JSR LSP      ; LOAD/SAVE IM DIR
+22020: E1D9          *=       $E1D9
+22020: E1D9 A2 08             LDX #8
+22020: E1DB A0 01             LDY #1
+22020: E1DD 20 BB EE          JSR LSD
+22030: E5E7          *=       $E5E7
+22030: E5E7 20 D5 EE          JSR KEY      ; F-TASTEN
+22040: ECE7          *=       $ECE7        ; SHIFT RUN/STOP
+22050: ECE7 4C CF 22          .BYT "L","Ï",34,"*"
+22060: E44B          *=       $E44B
+22060: E44B 7B F9             .WORD NEUBEF ;BASIC-
+22061: E451          *=       $E451
+22061: E451 99 EF             .WORD GETAUS ;VEKTOREN
+22062: EC78          *=       $EC78
+22062: EC78 84                .BYT $84     ;CTRL INST
+22063: ECAB          *=       $ECAB
+22063: ECAB 82                .BYT $82     ;CTRL HOME
+22064: EC7A          *=       $EC7A
+22064: EC7A 81                .BYT $81     ;CTRL CRSR RIGHT
+            ;--------------------------------
+22100: EEBB          *=       $EEBB
+22110: EEBB 20 BA FF LSD      JSR $FFBA
+22110: EEBE AD 98 02 TSTBA    LDA FLAG
+22115: EEC1 10 11             BPL LSP1
+22115: EEC3 29 0F             AND #15
+22115: EEC5 85 BA             STA $BA
+22115: EEC7 60                RTS
+22120: EEC8 20 79 00 LSP      JSR $0079
+22120: EECB C9 2C             CMP #","
+22120: EECD F0 05             BEQ LSP1
+22140: EECF 68                PLA
+22140: EED0 68                PLA
+22140: EED1 4C F8 A8          JMP $A8F8
+22140: EED4 60       LSP1     RTS
+22150: EED5 20 B4 E5 KEY      JSR $E5B4
+22150: EED8 24 9D             BIT $9D
+22150: EEDA 10 F8             BPL LSP1
+22155: EEDC 2C 98 02          BIT FLAG
+22155: EEDF 10 F3             BPL LSP1
+22160: EEE1 C9 03             CMP #3
+22160: EEE3 D0 0A             BNE KEY2
+22170: EEE5 A2 00    CLR      LDX #0
+22170: EEE7 86 C7             STX $C7
+22170: EEE9 86 D4             STX $D4
+22180: EEEB 86 D8             STX $D8
+22180: EEED F0 E5             BEQ LSP1
+22190: EEEF C9 81    KEY2     CMP #$81
+22190: EEF1 90 E1             BCC LSP1
+22190: EEF3 D0 16             BNE KEY3
+22191: EEF5 A4 D5             LDY $D5
+22191: EEF7 C8                INY
+22191: EEF8 88       KL1      DEY
+22191: EEF9 30 06             BMI KL2
+22192: EEFB B1 D1             LDA ($D1),Y
+22192: EEFD C9 20             CMP #" "
+22192: EEFF F0 F7             BEQ KL1
+22193: EF01 84 D3    KL2      STY $D3
+22193: EF03 C4 D5             CPY $D5
+22193: EF05 F0 10             BEQ K3C
+22194: EF07 E6 D3             INC $D3
+22194: EF09 D0 0C             BNE K3C
+22200: EF0B C9 82    KEY3     CMP #$82
+22210: EF0D D0 0E             BNE KEY4
+22210: EF0F A2 18             LDX #24
+22210: EF11 A0 00             LDY #0
+22210: EF13 18                CLC
+22211: EF14 20 F0 FF          JSR $FFF0
+22211: EF17 20 E5 EE K3C      JSR CLR
+22211: EF1A 4C 6C EF          JMP K3
+22220: EF1D C9 84    KEY4     CMP #$84
+22220: EF1F D0 0F             BNE KEY5
+22230: EF21 A9 20             LDA #" "
+22230: EF23 A4 D3             LDY $D3
+22230: EF25 C4 D5    K4       CPY $D5
+22231: EF27 F0 02             BEQ K5
+22231: EF29 B0 EC             BCS K3C
+22232: EF2B 91 D1    K5       STA ($D1),Y
+22232: EF2D C8                INY
+22232: EF2E D0 F5             BNE K4
+22240: EF30 C9 8C    KEY5     CMP #140
+22240: EF32 F0 1E             BEQ K8
+22240: EF34 B0 9E             BCS LSP1
+22250: EF36 C9 89             CMP #137
+22250: EF38 F0 9A             BEQ LSP1
+22260: EF3A C9 85             CMP #133
+22260: EF3C 90 96             BCC LSP1
+22270: EF3E E9 85             SBC #133
+22270: EF40 A8                TAY
+22270: EF41 BE 71 EF          LDX KEY1,Y
+22270: EF44 A0 01             LDY #1
+22280: EF46 BD 78 EF K1       LDA KT,X
+22280: EF49 F0 1F             BEQ K2
+22290: EF4B 99 76 02 KTX      STA $0276,Y
+22290: EF4E C8                INY
+22290: EF4F E8                INX
+22290: EF50 D0 F4             BNE K1
+22300: EF52 A9 40    K8       LDA #"@"
+22300: EF54 8D 77 02          STA $0277
+22310: EF57 AD 98 02          LDA FLAG
+22310: EF5A 29 0F             AND #15
+22310: EF5C 49 01             EOR #1
+22310: EF5E 09 30             ORA #"0"
+22320: EF60 8D 78 02          STA $0278
+22320: EF63 A9 0D             LDA #13
+22320: EF65 8D 79 02          STA $0279
+22325: EF68 A0 03             LDY #3
+22330: EF6A 84 C6    K2       STY $C6
+22330: EF6C 68       K3       PLA
+22330: EF6D 68                PLA
+22330: EF6E 4C CD E5          JMP $E5CD
+22340: EF71 00 07 0D KEY1     .BYT 0,KT3-KT,KT5-KT,KT7-KT
+22350: EF75 FF 19 1C          .BYT <-1,KT4-KT,KT6-KT
+22360: EF78 93 4C 49 KT       .ASC "“LIST"
+22360: EF7D 0D 00             .BYT 13,0
+22370: EF7F 52 55 4E KT3      .ASC "RUN:"
+22370: EF83 0D 00             .BYT 13,0
+22380: EF85 4C 4F 41 KT5      .ASC "LOAD"
+22380: EF89 0D 00             .BYT 13,0
+22390: EF8B 93 3E 24 KT7      .ASC "“>$0"
+22390: EF8F 0D 00             .BYT 13,0
+22400: EF91 5F       KT4      .ASC "_"
+22400: EF92 0D 00             .BYT 13,0
+22410: EF94 53 41 56 KT6      .ASC "SAVE"
+22410: EF98 00                .BYT 0
+22440: EF99 2C 98 02 GETAUS   BIT FLAG
+22440: EF9C 30 03             BMI GETOK
+22441: EF9E 4C 86 AE          JMP $AE86
+22445: EFA1 A9 00    GETOK    LDA #0
+22445: EFA3 85 0D             STA $0D
+22450: EFA5 20 73 00          JSR $0073
+22450: EFA8 C9 24             CMP #"$"
+22450: EFAA F0 23             BEQ GTA1
+22460: EFAC C9 25             CMP #"%"
+22460: EFAE F0 06             BEQ GTA2
+22460: EFB0 20 79 00          JSR $0079
+22470: EFB3 4C 8D AE          JMP $AE8D
+22480: EFB6 A9 00    GTA2     LDA #0
+22480: EFB8 85 63             STA $63
+22480: EFBA 85 62             STA $62
+22490: EFBC 20 73 00 GTA2A    JSR $0073
+22490: EFBF B0 3C             BCS GTAE
+22500: EFC1 C9 32             CMP #"2"
+22500: EFC3 B0 07             BCS GTAERR
+22510: EFC5 4A                LSR
+22510: EFC6 26 63             ROL $63
+22510: EFC8 26 62             ROL $62
+22510: EFCA 90 F0             BCC GTA2A
+22520: EFCC 4C 48 B2 GTAERR   JMP $B248    ; ILL. QUANTITY
+22530: EFCF A9 00    GTA1     LDA #0
+22530: EFD1 85 62             STA $62
+22530: EFD3 85 63    GTA1A    STA $63
+22540: EFD5 20 73 00          JSR $0073
+22540: EFD8 38                SEC
+22540: EFD9 E9 30             SBC #"0"
+22550: EFDB 90 20             BCC GTAE
+22550: EFDD C9 0A             CMP #10
+22550: EFDF 90 0A             BCC GTA1O
+22560: EFE1 E9 07             SBC #"A"-"9"-1
+22560: EFE3 C9 0A             CMP #10
+22560: EFE5 90 16             BCC GTAE
+22570: EFE7 C9 10             CMP #16
+22570: EFE9 B0 E1             BCS GTAERR
+22580: EFEB 48       GTA1O    PHA
+22580: EFEC A0 04             LDY #4
+22580: EFEE          GTA3     
+22590: EFEE 06 63             ASL $63
+22590: EFF0 26 62             ROL $62
+22590: EFF2 B0 D8             BCS GTAERR
+22600: EFF4 88                DEY
+22600: EFF5 D0 F7             BNE GTA3
+22600: EFF7 68                PLA
+22600: EFF8 05 63             ORA $63
+22610: EFFA 4C D3 EF          JMP GTA1A
+22620: EFFD A2 90    GTAE     LDX #$90
+22620: EFFF 38                SEC
+22620: F000 20 49 BC          JSR $BC49
+22630: F003 4C 79 00          JMP $0079
+            ;F014
+            ;--------------------------------
+            ;--------------------------------
+23000: FE75          *=       $FE75
+23000: FE75          NB1F     
+23005: FE75 A9 00             LDA #0
+23005: FE77 85 90             STA $90
+23005: FE79 A5 BA             LDA $BA
+23005: FE7B 20 B1 FF          JSR $FFB1
+23010: FE7E AD 01 02          LDA $0201
+23010: FE81 C9 24             CMP #"$"
+23010: FE83 D0 03             BNE NB1C
+23015: FE85 A9 F0             LDA #$F0
+23015: FE87 2C                .BYT $2C
+23020: FE88 A9 FF    NB1C     LDA #$FF
+23020: FE8A 20 93 FF          JSR $FF93
+23025: FE8D A5 90             LDA $90
+23025: FE8F 30 45             BMI NBA1E
+23030: FE91 A0 00             LDY #0
+23030: FE93 B9 01 02 NBA1A    LDA $0201,Y
+23030: FE96 F0 06             BEQ NB1E
+23035: FE98 20 A8 FF          JSR $FFA8
+23035: FE9B C8                INY
+23035: FE9C D0 F5             BNE NBA1A
+23040: FE9E 20 AE FF NB1E     JSR $FFAE
+23040: FEA1 A5 90             LDA $90
+23040: FEA3 D0 31             BNE NBA1E
+23045: FEA5 A5 BA             LDA $BA
+23045: FEA7 20 B4 FF          JSR $FFB4
+23050: FEAA AD 01 02          LDA $0201
+23055: FEAD C9 24             CMP #"$"
+23055: FEAF 4C C2 FE          JMP NB1G
+            ;FFB6
+            ;--------------------------------
+23058: FEC2          *=       $FEC2
+23060: FEC2 F0 17    NB1G     BEQ NB1D
+23060: FEC4 A9 FF             LDA #$FF
+23063: FEC6 20 96 FF          JSR $FF96
+23065: FEC9 20 A5 FF NB1B     JSR $FFA5
+23065: FECC 20 16 E7          JSR $E716
+23065: FECF A5 90             LDA $90
+23070: FED1 F0 F6             BEQ NB1B
+23070: FED3 20 AB FF NBDE     JSR $FFAB
+23075: FED6 68       NBA1E    PLA
+23075: FED7 68                PLA
+23075: FED8 4C 86 E3          JMP $E386
+23085: FEDB A9 F0    NB1D     LDA #$F0
+23085: FEDD 20 96 FF          JSR $FF96
+23090: FEE0 20 A5 FF          JSR $FFA5
+23090: FEE3 20 A5 FF          JSR $FFA5
+23095: FEE6 20 A5 FF NBDL     JSR $FFA5
+23095: FEE9 20 A5 FF          JSR $FFA5
+23100: FEEC A6 90             LDX $90
+23100: FEEE D0 26             BNE EDL3
+23105: FEF0 20 A5 FF          JSR $FFA5
+23105: FEF3 AA                TAX
+23105: FEF4 20 A5 FF          JSR $FFA5
+23105: FEF7 20 CD BD          JSR $BDCD
+23110: FEFA 20 A5 FF EDL1     JSR $FFA5
+23110: FEFD A6 90             LDX $90
+23110: FEFF D0 07             BNE EDL2
+23115: FF01 20 16 E7          JSR $E716
+23115: FF04 C9 00             CMP #0
+23120: FF06 D0 F2             BNE EDL1
+23125: FF08 A9 0D    EDL2     LDA #13
+23125: FF0A 20 16 E7          JSR $E716
+23130: FF0D 20 E4 FF          JSR $FFE4
+23130: FF10 D0 04             BNE EDL3
+23135: FF12 A5 90             LDA $90
+23135: FF14 F0 D0             BEQ NBDL
+23135: FF16 20 AB FF EDL3     JSR $FFAB
+23140: FF19 A5 BA             LDA $BA
+23140: FF1B 20 B1 FF          JSR $FFB1
+23140: FF1E A9 E0             LDA #$E0
+23145: FF20 20 93 FF          JSR $FF93
+23145: FF23 20 AE FF          JSR $FFAE
+23145: FF26 4C D6 FE          JMP NBA1E
+            ;STA ACIA+1
+23220: FF29 EA                NOP
+23220: FF2A EA                NOP
+23220: FF2B EA                NOP
+23225: FF2C 4C 6E FF          JMP $FF6E
+            ;FF48
+            ;******** KASSETTE LOESCHEN *****
+24000: F5F8          *=       $F5F8
+24000: F5F8 90 F7              BCC $F5F1   ; SAVE
+24010: F4B6          *=       $F4B6
+24010: F4B6 90 F7              BCC $F4AF   ; LOAD
+24020: F38B          *=       $F38B
+24020: F38B 4C 13 F7           JMP $F713   ; OPEN
+24030: F2C8          *=       $F2C8
+24030: F2C8 4C 13 F7           JMP $F713   ; CLOSE
+24040: F26F          *=       $F26F
+24040: F26F 4C 13 F7           JMP $F713   ; CKOUT
+24050: F225          *=       $F225
+24050: F225 D0 48              BNE $F26F   ; CHKIN
+24060: F1E5          *=       $F1E5
+24060: F1E5 38                 SEC
+24060: F1E6 B0 15             BCS $F1FD    ; BSOUT
+24070: F179          *=       $F179
+24070: F179 38                 SEC
+24070: F17A 60                RTS          ; BASIN
+            ;******* PARALLELER IEC-BUS *****
+25000: F17B          Z1       =$94
+25000: F17B          Z2       =$95
+25000: F17B          Z4       =$A3
+25000: F17B          Z3       =$0285
+25010: F17B          B1       =$FE1C
+25010: F17B          B2       =$DC07
+25010: F17B          B3       =$DC0D
+25020: F17B          B4       =$DC0F
+25020: F17B          B5       =TPI
+25020: F17B          B6       =TPI+1
+25030: F17B          B7       =TPI+3
+25030: F17B          B8       =TPI+4
+25040: F17B          C1       =B5
+25040: F17B          C2       =TPI+2
+25040: F17B          C3       =TPI+3
+25050: F17B          C4       =B8
+25050: F17B          C5       =TPI+5
+25100: FDAB          *=       $FDAB
+25100: FDAB 20 2C F7           JSR NINI
+25105: FD50          *=       $FD50
+25105: FD50 4C 4D F9           JMP NMINI
+25110: ED0E          *=       $ED0E
+25110: ED0E 4C B1 F8           JMP NTALK   ; UND LISTEN
+25120: EDBB          *=       $EDBB
+25120: EDBB 4C C2 F8           JMP NSECL
+25130: EDC9          *=       $EDC9
+25130: EDC9 4C D0 F8           JMP NSECT
+25140: EDDD          *=       $EDDD
+25140: EDDD 4C DE F8           JMP NOUT
+25140: EDE0 EA                NOP
+25150: EDF0          *=       $EDF0
+25150: EDF0 4C F0 F8           JMP NUT
+25160: EE00          *=       $EE00
+25160: EE00 4C FE F8           JMP NUL
+25170: EE13          *=       $EE13
+25170: EE13 4C 0C F9           JMP NIN
+25180: F281          *=       $F281
+25180: F281 20 70 F9           JSR NATNHI
+25200: F72C          *=       $F72C
+25205: F72C 8D 00 DC NINI     STA $DC00
+25210: F72F          IECINI   .IF MIKE-1
+25210: F72F                   .GOTO 25219
+25219: F72F AD 02 DF          LDA C2
+25219: F732 29 EF             AND # 239
+25219: F734 8D 02 DF          STA C2
+25220: F737 A0 00             LDY # 0
+25220: F739 8C 04 DF          STY C4
+25220: F73C A9 3A             LDA # 58
+25230: F73E 8D 00 DF          STA C1
+25230: F741 A9 3F             LDA # 63
+25230: F743 8D 03 DF          STA C3
+25240: F746 AD 02 DF          LDA C2
+25240: F749 29 FE             AND # 254
+25240: F74B 8D 02 DF          STA C2
+25250: F74E A0 FF             LDY # 255
+25250: F750 88       L0       DEY 
+25250: F751 EA                NOP
+25260: F752 D0 FC             BNE L0
+25260: F754 AD 02 DF          LDA C2
+25260: F757 09 01             ORA # 1
+25270: F759 8D 02 DF          STA C2
+25270: F75C A9 39             LDA # 57
+25270: F75E 8D 00 DF          STA C1
+25280: F761 4C AE FD          JMP $FDAE
+            ;RTS
+            ;*****
+25300: F764 09 40    IECTALK  ORA # 64
+25300: F766 2C                .BYT $2C
+25310: F767 09 20    IECLISTEN ORA # 32
+25320: F769 48       IECTL L1 PHA 
+25320: F76A A9 3B             LDA # 59
+25320: F76C 8D 03 DF          STA B7
+25330: F76F A9 FF             LDA # 255
+25330: F771 8D 01 DF          STA B6
+25330: F774 8D 04 DF          STA B8
+25340: F777 A9 FA             LDA # 250
+25340: F779 8D 00 DF          STA B5
+25340: F77C A5 94             LDA Z1
+25350: F77E 10 1B             BPL L2
+25350: F780 AD 00 DF          LDA B5
+25350: F783 29 DF             AND # 223
+25360: F785 8D 00 DF          STA B5
+25360: F788 A5 95             LDA Z2
+25360: F78A 20 F5 F7          JSR L7
+25370: F78D A5 94             LDA Z1
+25370: F78F 29 7F             AND # 127
+25370: F791 85 94             STA Z1
+25380: F793 AD 00 DF          LDA B5
+25380: F796 09 20             ORA # 32
+25380: F798 8D 00 DF          STA B5
+25390: F79B AD 00 DF L2       LDA B5
+25390: F79E 29 F7             AND # 247
+25390: F7A0 8D 00 DF          STA B5
+25400: F7A3 68                PLA 
+25400: F7A4 4C F5 F7          JMP L7
+25400: F7A7 20 F5 F7 SECLISTEN JSR L7
+25410: F7AA AD 00 DF L3       LDA B5
+25410: F7AD 09 08             ORA # 8
+25410: F7AF 8D 00 DF          STA B5
+25420: F7B2 60                RTS
+25430: F7B3 20 F5 F7 SECTALK  JSR L7
+25430: F7B6 A9 3D    L4       LDA # 61
+25440: F7B8 2D 00 DF          AND B5
+25440: F7BB 8D 00 DF          STA B5
+25440: F7BE A9 C3             LDA # 195
+25450: F7C0 8D 03 DF          STA B7
+25450: F7C3 A9 00             LDA # 0
+25450: F7C5 8D 04 DF          STA B8
+25460: F7C8 F0 E0             BEQ L3
+25460: F7CA 48       IECOUT   PHA 
+25460: F7CB A5 94             LDA Z1
+25470: F7CD 10 07             BPL L5
+25470: F7CF A5 95             LDA Z2
+25470: F7D1 20 F5 F7          JSR L7
+25480: F7D4 A5 94             LDA Z1
+25480: F7D6 09 80    L5       ORA # 128
+25480: F7D8 85 94             STA Z1
+25490: F7DA 68                PLA 
+25490: F7DB 85 95             STA Z2
+25490: F7DD 18                CLC 
+25500: F7DE 60                RTS 
+25500: F7DF A9 5F    UNTALK   LDA # 95
+25500: F7E1 D0 02             BNE L6
+25510: F7E3 A9 3F    UNLISTEN LDA # 63
+25510: F7E5 20 69 F7 L6       JSR L1
+25510: F7E8 20 B6 F7          JSR L4
+25520: F7EB A9 FD             LDA # 253
+25520: F7ED 0D 00 DF          ORA B5
+25520: F7F0 8D 00 DF          STA B5
+25520: F7F3 58                CLI
+25530: F7F4 60                RTS 
+25530: F7F5 49 FF    L7       EOR # 255
+25530: F7F7 8D 01 DF          STA B6
+25540: F7FA AD 00 DF          LDA B5
+25540: F7FD 09 12             ORA # 18
+25540: F7FF 8D 00 DF          STA B5
+25550: F802 2C 00 DF          BIT B5
+25550: F805 50 09             BVC L8
+25550: F807 10 07             BPL L8
+25560: F809 A9 80             LDA # 128
+25560: F80B 20 1C FE          JSR B1
+25560: F80E D0 2B             BNE L12
+25570: F810 AD 00 DF L8       LDA B5
+25570: F813 10 FB             BPL L8
+25570: F815 29 EF             AND # 239
+25580: F817 8D 00 DF          STA B5
+25580: F81A 20 A3 F8 L9       JSR L18
+25580: F81D 2C 00 DF L10      BIT B5
+25590: F820 70 11             BVS L11
+25590: F822 AD 0D DC          LDA B3
+25590: F825 29 02             AND # 2
+25600: F827 F0 F4             BEQ L10
+25600: F829 AD 85 02          LDA Z3
+25600: F82C 30 EC             BMI L9
+25610: F82E A9 01             LDA # 1
+25610: F830 20 1C FE          JSR B1
+25610: F833 AD 00 DF L11      LDA B5
+25620: F836 09 10             ORA # 16
+25620: F838 8D 00 DF          STA B5
+25620: F83B A9 FF    L12      LDA # 255
+25630: F83D 8D 01 DF          STA B6
+25630: F840 60                RTS 
+25630: F841 AD 00 DF IECIN    LDA B5
+25640: F844 29 BD             AND # 189
+25640: F846 09 81             ORA # 129
+25640: F848 8D 00 DF          STA B5
+25650: F84B 20 A3 F8 L13      JSR L18
+25650: F84E AD 00 DF L14      LDA B5
+25650: F851 29 10             AND # 16
+25660: F853 F0 1D             BEQ L15
+25660: F855 AD 0D DC          LDA B3
+25660: F858 29 02             AND # 2
+25670: F85A F0 F2             BEQ L14
+25670: F85C AD 85 02          LDA Z3
+25670: F85F 30 EA             BMI L13
+25680: F861 A9 02             LDA # 2
+25680: F863 20 1C FE          JSR B1
+25680: F866 AD 00 DF          LDA B5
+25690: F869 29 3D             AND # 61
+25690: F86B 8D 00 DF          STA B5
+25690: F86E A9 0D             LDA # 13
+25700: F870 18                CLC 
+25700: F871 60                RTS 
+25700: F872 AD 00 DF L15      LDA B5
+25710: F875 29 7F             AND # 127
+25710: F877 8D 00 DF          STA B5
+25710: F87A 29 20             AND # 32
+25720: F87C D0 05             BNE L16
+25720: F87E A9 40             LDA # 64
+25720: F880 20 1C FE          JSR B1
+25730: F883 AD 01 DF L16      LDA B6
+25730: F886 49 FF             EOR # 255
+25730: F888 48                PHA 
+25740: F889 AD 00 DF          LDA B5
+25740: F88C 09 40             ORA # 64
+25740: F88E 8D 00 DF          STA B5
+25750: F891 AD 00 DF L17      LDA B5
+25750: F894 29 10             AND # 16
+25750: F896 F0 F9             BEQ L17
+25760: F898 AD 00 DF          LDA B5
+25760: F89B 29 BF             AND # 191
+25760: F89D 8D 00 DF          STA B5
+25770: F8A0 68                PLA 
+25770: F8A1 18                CLC 
+25770: F8A2 60                RTS 
+25780: F8A3 A9 FF    L18      LDA # 255
+25780: F8A5 8D 07 DC          STA B2
+25780: F8A8 A9 11             LDA # 17
+25790: F8AA 8D 0F DC          STA B4
+25790: F8AD AD 0D DC          LDA B3
+25790: F8B0 60                RTS
+            ;**** EINBINDUNG
+25830: F8B1 20 1A F9 NTALK    JSR SETDEV
+25840: F8B4 2C 99 02          BIT MAP
+25840: F8B7 10 03             BPL OTL
+25840: F8B9 4C 69 F7          JMP IECTL
+25850: F8BC 20 A4 F0 OTL      JSR $F0A4
+25850: F8BF 4C 11 ED          JMP $ED11
+25860: F8C2 2C 99 02 NSECL    BIT MAP
+25860: F8C5 10 03             BPL OSL
+25860: F8C7 4C A7 F7          JMP SECLISTEN
+25870: F8CA 20 36 ED OSL      JSR $ED36
+25870: F8CD 4C BE ED          JMP $EDBE
+25880: F8D0 2C 99 02 NSECT    BIT MAP
+25880: F8D3 10 03             BPL OST
+25880: F8D5 4C B3 F7          JMP SECTALK
+25890: F8D8 20 36 ED OST      JSR $ED36
+25890: F8DB 4C CC ED          JMP $EDCC
+25900: F8DE 2C 99 02 NOUT     BIT MAP
+25900: F8E1 10 03             BPL OOUT
+25900: F8E3 4C CA F7          JMP IECOUT
+25910: F8E6 24 94    OOUT     BIT $94
+25910: F8E8 30 03             BMI OOUT1
+25910: F8EA 4C E1 ED          JMP $EDE1
+25920: F8ED 4C E6 ED OOUT1    JMP $EDE6
+25930: F8F0 2C 99 02 NUT      BIT MAP
+25930: F8F3 10 03             BPL OUT
+25930: F8F5 4C DF F7          JMP UNTALK
+25940: F8F8 20 8E EE OUT      JSR $EE8E
+25940: F8FB 4C F3 ED          JMP $EDF3
+25950: F8FE 2C 99 02 NUL      BIT MAP
+25950: F901 10 03             BPL OUL
+25950: F903 4C E3 F7          JMP UNLISTEN
+25960: F906 20 11 ED OUL      JSR $ED11
+25960: F909 4C 03 EE          JMP $EE03
+25970: F90C 2C 99 02 NIN      BIT MAP
+25970: F90F 10 03             BPL OIN
+25970: F911 4C 41 F8          JMP IECIN
+25980: F914 78       OIN      SEI
+25980: F915 A9 00             LDA #0
+25980: F917 4C 16 EE          JMP $EE16
+25990: F91A 48       SETDEV   PHA
+25990: F91B 84 A3             STY Z4
+26000: F91D 29 0F             AND #15
+26000: F91F 38                SEC
+26000: F920 E9 04             SBC #4
+26000: F922 90 1B             BCC PIEC
+26010: F924 C9 07             CMP #7
+26010: F926 B0 0D             BCS SIEC1    ;PIEC
+26010: F928 A8                TAY
+26020: F929 B9 46 F9          LDA POT2,Y
+26020: F92C A4 A3             LDY Z4
+26020: F92E 46 A3             LSR Z4
+26020: F930 2D 99 02          AND MAP
+26020: F933 F0 0A             BEQ PIEC
+26030: F935 AD 99 02 SIEC1    LDA MAP
+26030: F938 29 7F             AND #127
+26030: F93A 8D 99 02 SIEC     STA MAP
+26030: F93D 68                PLA
+26030: F93E 60                RTS
+26040: F93F          PIEC     
+26050: F93F AD 99 02          LDA MAP
+26050: F942 09 80             ORA #128
+26050: F944 D0 F4             BNE SIEC
+26060: F946 01 02 04 POT2     .BYT 1,2,4,8,$10,$20,$40
+26070: F94D A9 00    NMINI    LDA #0
+26070: F94F A8                TAY
+26070: F950 20 53 FD          JSR $FD53
+26080: F953                   .IF MIKE
+26085: F953 A9 80             LDA #%10000000
+26090: F955 8D 99 02          STA MAP
+26100: F958 A9 80             LDA #128
+26100: F95A 8D 8A 02          STA 650
+26110: F95D A9 88    FRESET   LDA #8+128
+26110: F95F 8D 98 02          STA FLAG
+26115: F962 A9 B4             LDA #180
+26115: F964 8D BF 02          STA BLNK2
+26115: F967 8D 13 03          STA BLNKT
+26116: F96A                   .IF MIKE
+26117: F96A A9 00             LDA #0
+26120: F96C 8D BE 02          STA BLNK1
+26120: F96F 60                RTS
+26200: F970 2C 99 02 NATNHI   BIT MAP
+26200: F973 10 03             BPL OAH
+26200: F975 4C AA F7          JMP L3
+26210: F978 4C BE ED OAH      JMP $EDBE
+            ;***** WAS NICHT MIT KASSETE GEHT
+27000: F97B 2C 98 02 NEUBEF   BIT FLAG
+27000: F97E 10 16             BPL NEUEND
+27005: F980 20 BE EE          JSR TSTBA
+27005: F983 AD 00 02          LDA $0200
+27010: F986 C9 40             CMP #"@"
+27010: F988 F0 2A             BEQ NBA1
+27010: F98A C9 3E             CMP #">"
+27020: F98C F0 26             BEQ NBA1
+27020: F98E C9 21             CMP #"!"
+27020: F990 F0 07             BEQ NBA2
+27030: F992 C9 5F             CMP #"_"
+27030: F994 F0 2F             BEQ SYSOFF
+27035: F996 4C 7C A5 NEUEND   JMP $A57C
+27040: F999 A9 01    NBA2     LDA #1
+27040: F99B A8                TAY
+27040: F99C 91 2B             STA ($2B),Y
+27050: F99E 20 33 A5          JSR $A533
+27050: F9A1 A5 22             LDA $22
+27050: F9A3 18                CLC
+27050: F9A4 69 02             ADC #2
+27060: F9A6 85 2D             STA $2D
+27060: F9A8 A5 23             LDA $23
+27060: F9AA 69 00             ADC #0
+27060: F9AC 85 2E             STA $2E
+27070: F9AE 20 63 A6          JSR $A663
+27070: F9B1 4C 86 E3          JMP $E386
+27080: F9B4 20 73 00 NBA1     JSR $0073
+27080: F9B7 90 03             BCC NBZ1
+27080: F9B9 4C 75 FE          JMP NB1F
+27090: F9BC 20 9E B7 NBZ1     JSR $B79E
+27090: F9BF 8A                TXA
+27090: F9C0 29 0F             AND #15
+27100: F9C2 09 80             ORA #128
+27100: F9C4 2C                .BYT $2C
+27105: F9C5 A9 00    SYSOFF   LDA #0
+27110: F9C7 8D 98 02 NBA1EX   STA FLAG
+27110: F9CA 4C D6 FE          JMP NBA1E
+            ;*******************************
+            ;***** SCROLL-HALT
+28005: F9CD          PCX1     =*
+28005: E940          *=       $E940
+28010: E940 49 24             EOR #%00100100
+28010: E942 29 24             AND #%00100100
+28020: E944 F0 10             BEQ $E956
+28020: E946 4C CD F9          JMP PCX1
+28020: E949 EA                NOP
+28020: E94A EA                NOP
+28030: F9CD          *=       PCX1
+28040: F9CD C9 04             CMP #%00000100
+28040: F9CF F0 07             BEQ S1       ;CTRL LANGSAM
+28050: F9D1 C9 20             CMP #%00100000
+28050: F9D3 D0 06             BNE S2       ;CTRL/CBM STOP
+            ;JSR TESTHCOPY                 ;NUR CBM
+28060: F9D5 4C 38 E9 S0       JMP $E938
+28060: F9D8 4C 4B E9 S1       JMP $E94B
+28070: F9DB AD 01 DC S2       LDA $DC01
+28070: F9DE C9 FF             CMP #$FF
+28070: F9E0 D0 F9             BNE S2
+28080: F9E2 AD 01 DC S3       LDA $DC01
+28080: F9E5 29 20             AND #$20
+28080: F9E7 D0 F9             BNE S3
+28090: F9E9 F0 EA             BEQ S0
+            ;********************************
+28105: F9EB                   .GOTO 28200
+            ;********************************
+28210: F9EB          LB0      =$B0
+28210: F9EB          LB1      =LB0+1
+28220: F9EB          L028E    =$028E
+28230: F9EB          HCDEV    =4
+28230: F9EB          HCSEC    =7
+28240: F9EB          HCOPY                 ;INC 53280
+28245: F9EB A9 20             LDA #$20
+28245: F9ED 2C 11 D0          BIT $D011    ; TEST HIRES
+28250: F9F0 D0 72             BNE LC1AA
+28260: F9F2 AD 8E 02          LDA L028E
+28260: F9F5 30 6D             BMI LC1AA
+28270: F9F7 A9 80             LDA #$80
+28270: F9F9 8D 8E 02          STA L028E
+28280: F9FC AD 00 DD          LDA $DD00    ; ADRESSE BERECHNEN
+28290: F9FF 4A                LSR 
+28290: FA00 AD 18 D0          LDA $D018
+28300: FA03 29 70             AND #$70
+28300: FA05 6A                ROR 
+28310: FA06 AA                TAX 
+28310: FA07 AD 00 DD          LDA $DD00
+28320: FA0A 4A                LSR 
+28320: FA0B 4A                LSR 
+28330: FA0C 8A                TXA 
+28330: FA0D 6A                ROR 
+28340: FA0E 49 C0             EOR #$C0
+28340: FA10 85 B1             STA LB1      ; HIBYTE
+28350: FA12 A9 00             LDA #$00
+28350: FA14 85 B0             STA LB0
+28360: FA16 A9 04             LDA #HCDEV
+28360: FA18 20 0C ED          JSR $ED0C    ; LISTEN
+28370: FA1B A9 67             LDA #$60+HCSEC; SECLISTEN
+28380: FA1D 20 B9 ED          JSR $EDB9
+28380: FA20 A9 0D             LDA #13
+28380: FA22 20 DD ED          JSR $EDDD
+28390: FA25 A2 19             LDX #25
+28400: FA27 A0 00    LC1E0    LDY #$00
+28400: FA29 B1 B0    LC1E2    LDA (LB0),Y
+28410: FA2B 29 7F             AND #$7F
+28410: FA2D C9 40             CMP #$40
+28420: FA2F 90 08             BCC LC1F2
+28420: FA31 C9 60             CMP #$60
+28430: FA33 90 02             BCC LC1F0
+28430: FA35 49 40             EOR #$40
+28440: FA37 49 80    LC1F0    EOR #$80
+28440: FA39 C9 20    LC1F2    CMP #$20
+28450: FA3B B0 02             BCS LC1F8
+28450: FA3D 49 40             EOR #$40
+28460: FA3F 20 DD ED LC1F8    JSR $EDDD
+28460: FA42 C8                INY
+28470: FA43 C0 28             CPY #$28
+28470: FA45 90 E2             BCC LC1E2
+28480: FA47 A9 0D             LDA #$0D
+28480: FA49 20 DD ED          JSR $EDDD
+28490: FA4C 98                TYA 
+28490: FA4D 18                CLC 
+28500: FA4E 65 B0             ADC LB0
+28500: FA50 85 B0             STA LB0
+28510: FA52 90 02             BCC LC22A
+28520: FA54 E6 B1             INC LB1
+28520: FA56 CA       LC22A    DEX
+28530: FA57 D0 CE             BNE LC1E0
+28530: FA59 20 FE ED          JSR $EDFE    ; UNLISTEN
+28540: FA5C 20 FE ED          JSR $EDFE
+28550: FA5F A9 00             LDA #$00
+28550: FA61 8D 8E 02          STA L028E
+28560: FA64 38       LC1AA    SEC
+28560: FA65 60                RTS
+            ;*******************************
+28600: FA66          PCX2     =*
+28600: EB76          *=       $EB76
+28610: EB76 4C 66 FA          JMP HC2
+28610: FA66          *=       PCX2
+28620: FA66 E0 04    HC2      CPX #4
+28620: FA68 D0 0A             BNE HCE
+28630: FA6A A5 CB             LDA $CB
+28630: FA6C C9 39             CMP #$39
+28630: FA6E D0 04             BNE HCE
+28640: FA70 24 C6             BIT $C6
+28640: FA72 10 03             BPL HC
+28640: FA74 4C E0 EA HCE      JMP $EAE0
+28650: FA77 A9 FF    HC       LDA #<-1
+28650: FA79 85 C6             STA $C6
+28660: FA7B 20 EB F9          JSR HCOPY
+28660: FA7E A9 00             LDA #0
+28660: FA80 85 C6             STA $C6
+28665: FA82 4C 42 EB          JMP $EB42
+            ;*******************************
+28670: FA85          BLIRQ    
+28670: FA85 AE BE 02          LDX BLNK1
+28670: FA88 F0 21             BEQ BLXX
+28675: FA8A AE 11 D0          LDX $D011
+28675: FA8D 8A                TXA
+28675: FA8E 29 EF             AND #%11101111
+28680: FA90 AC BF 02          LDY BLNK2
+28680: FA93 C0 FF             CPY #255
+28680: FA95 F0 0C             BEQ BLANK
+28681: FA97 8A                TXA
+28681: FA98 29 10             AND #%00010000
+28681: FA9A D0 0F             BNE BLXX
+28684: FA9C 8A                TXA
+28684: FA9D AE D9 EC          LDX BC
+28685: FAA0 09 10             ORA #%00010000
+28685: FAA2 2C                .BYT $2C
+28685: FAA3 A2 00    BLANK    LDX #0
+28685: FAA5 8D 11 D0          STA $D011
+28685: FAA8 8E 20 D0          STX 53280
+28690: FAAB 4C 34 EA BLXX     JMP $EA34
+            ;*******************************
+28700: FAAE          PCX3     =*
+28700: EA98          *=       $EA98
+28710: EA98 4C AE FA          JMP BLNK
+28710: FAAE          *=       PCX3
+28730: FAAE F0 0A    BLNK     BEQ NOTPR
+28740: FAB0 A8                TAY
+28740: FAB1 AD 13 03          LDA BLNKT
+28740: FAB4 8D BF 02          STA BLNK2
+28750: FAB7 4C 9B EA          JMP $EA9B
+28760: FABA AD BE 02 NOTPR    LDA BLNK1
+28760: FABD F0 14             BEQ BLE
+28760: FABF CE BE 02          DEC BLNK1
+28770: FAC2 D0 0F             BNE BLE
+28770: FAC4 A9 32             LDA #50
+28770: FAC6 8D BE 02          STA BLNK1
+28780: FAC9 AD BF 02          LDA BLNK2
+28780: FACC C9 FF             CMP #255
+28780: FACE F0 03             BEQ BLE
+28780: FAD0 CE BF 02          DEC BLNK2
+28790: FAD3 4C 26 EB BLE      JMP $EB26
+28791: FAD6          PCX4     =*
+28791: E716          *=       $E716
+28792: E716 4C D6 FA          JMP BLS
+28792: FAD6          *=       PCX4
+28793: FAD6 48       BLS      PHA
+28793: FAD7 85 D7             STA $D7
+28793: FAD9 AD 13 03          LDA BLNKT
+28793: FADC 8D BF 02          STA BLNK2
+28793: FADF 4C 19 E7          JMP $E719
+            ;******** LEERE BEREICHE LOESCHEN
+            ;FCD1
+30000: FAE2 FF FF 00 DIV      .WORD -1, 2304, 1536, 1047
+30001: FAEA 59 03 00          .WORD 857, 768, 384, 192, 96
+30002: FAF4 40 00 30          .WORD 64, 48, 32, 24, 16, 12, 6
+30100: FB02 25 7F    RXX1     AND $7F
+30100: FB04 8D 97 02          STA SERST
+30100: FB07 B1 F7             LDA ($F7),Y
+30110: FB09 EE 9C 02          INC SERI1
+30110: FB0C 48                PHA
+30120: FB0D AD 94 02          LDA $0294
+30120: FB10 29 01             AND #1
+30120: FB12 F0 13             BEQ RSBI1
+30130: FB14 AD 9C 02          LDA SERI1
+30130: FB17 38                SEC
+30130: FB18 ED 9B 02          SBC SERI2
+30140: FB1B C9 C0             CMP #$C0
+30140: FB1D 90 08             BCC RSBI1
+30150: FB1F AD 04 D6          LDA UART+MCR
+30150: FB22 09 02             ORA #%00000010
+30160: FB24 8D 04 D6          STA UART+MCR
+30170: FB27 68       RSBI1    PLA
+30170: FB28 18                CLC
+30170: FB29 60                RTS
+30200: FB2A C9 40    RXX2     CMP #$40
+30200: FB2C B0 08             BCS SI3      ;
+30210: FB2E AD 04 D6          LDA UART+MCR
+30210: FB31 29 FD             AND #%11111101
+30220: FB33 8D 04 D6          STA UART+MCR
+30230: FB36 60       SI3      RTS
+30300: FB37 AD 06 D6 TX2      LDA UART+MSR
+30300: FB3A 29 30             AND #%00110000
+30310: FB3C C9 30             CMP #%00110000
+30310: FB3E D0 16             BNE TXRT
+30320: FB40 A2 0F             LDX #15
+30330: FB42 AC 9D 02 TXLOOP   LDY SERO1
+30330: FB45 CC 9E 02          CPY SERO2
+30340: FB48 F0 0C             BEQ SI6
+30340: FB4A B1 F9             LDA ($F9),Y
+30350: FB4C 8D 00 D6          STA UART+THR
+30351: FB4F C8                INY
+30351: FB50 8C 9D 02          STY SERO1
+30355: FB53 CA                DEX
+30355: FB54 D0 EC             BNE TXLOOP
+30360: FB56          SI6      
+30360: FB56          TXRT     
+30360: FB56 60       NOBYT    RTS
+30400: FB57 8D 97 02 RXX1A    STA SERST
+30400: FB5A A9 00             LDA #0
+30400: FB5C 60                RTS
+            ;*******************************
+50000: FB5D                   .END
+]E4DA-FB5D
