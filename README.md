@@ -1,53 +1,25 @@
 ## c64bs
 
-<pre>
-"BS  1.*" is a 'new' operating system for the C64 - actually it patches
-          the original one and has many more features.
-          1) I have an ACIA 6551 at $d600 (above the SID) in my C64, so the
-             normal RS232 routines have been exchanged by the 6551 ones.
-             note that the 6551 has a bug if you use hardware handshake,
-             disabling the outgoing of RTS/CTS also disables the receiver!
-             You may loose characters and are warned
-          2) in the now plenty of free space there is a Function-Key setting,
-             and a Disk-Command-Line interface. You can load/save a programm
-             in the directory (without removing "PRG") and standard file
-             for load/save/shift-run-stop is IEC device 8. 
-          3) I have an additional CBM IEEE488 (the parallel one) Interface on 
-             the expansion port of my C64. Unfortunately the Cartridge ROM 
-             copied itself to somewhere in $cxxx and completely disabled the 
-             serial bus. No use for many programms and if you have two drives 
-             - one parallel and one serial. So I removed the tape routines and
-             replaced them with the IEEE488 routines. Now you can choose
-             by a POKE (to ????). The IEEE488 routines don't look that well,
-             I reassembled them automatically (see another of my tools) from
-             the ROM (No not, copying copyrighted code ;-). Actually, this only
-             works with the Commodore expansion, so everyone who has them
-             should have the right to use this ROM) In the sources in 26080
-             the default value for the map is loaded, change it to what you 
-             want, a one means serial, zero is parallel, Bit 0 is Device 4,
-             Bit 7 is device 10, Bit 8 is used to store the actual state.
-          4) You can now use decimals like "$12ab" in hex, "&234" in octal
-             and "%001010" in binary format. Some special keys for the
-             screen editor have been added (Ctrl-Insert, Ctrl-Home and Ctrl-
-             Crsr-Right)
-          5) This one has some scroll options (try CTRL and CBM keys in 
-             combination), a Hardcopy-routine (? as far as I see from the
-             sources, my C64 is packed) and a screen-blanker?
-          This description is for the latest version, 
-          BS  1.22.S41 is only number 1) and 2).
-          BS  1.25.S03 is a reengineering from 1.32, it only has ACIA routines,
-                       F-keys, hex/octal/binariy ints, the @-Disk commands but
-                       no tape. especially for a friend of mine who doesn't 
-                       have the IEEE488.
-          BS  1.32.S63 has 1) to 4)
-          BS  1.33.S88 has all
+"BS  1.*" is a 'new' operating system for the C64 - actually it patches the original one and has many more features.
 
-	  BS  1.40.S89 has all except 1, but it has serial line routines
-		       for a 16550A UART (with FIFO) instead.
+1. I have an ACIA 6551 at $d600 (above the SID) in my C64, so the normal RS232 routines have been exchanged by the 6551 ones. Note that the 6551 has a bug if you use hardware handshake, disabling the outgoing of RTS/CTS also disables the receiver! You may loose characters and are warned!
 
-          A ROM image for 1.31, 1.32 and 1.40 is included. The ROM images have
-	  the UART/ACIA at $d600 and the TPI at $df00.
-</pre>      
+2. In the now plenty of free space there is a Function-Key setting, and a Disk-Command-Line interface. You can load/save a programm in the directory (without removing "PRG") and standard file for load/save/shift-run-stop is IEC device 8. 
+
+3. I have an additional CBM IEEE488 (the parallel one) Interface on the expansion port of my C64. Unfortunately the Cartridge ROM copied itself to somewhere in $cxxx and completely disabled the serial bus. No use for many programms and if you have two drives - one parallel and one serial. So I removed the tape routines and replaced them with the IEEE488 routines. Now you can choose by a POKE (to ????). The IEEE488 routines don't look that well, I reassembled them automatically (see another of my tools) from the ROM (No not, copying copyrighted code ;-). Actually, this only works with the Commodore expansion, so everyone who has them should have the right to use this ROM) In the sources in 26080 the default value for the map is loaded, change it to what you want, a one means serial, zero is parallel, Bit 0 is Device 4, Bit 7 is device 10, Bit 8 is used to store the actual state.
+
+4. You can now use decimals like "$12ab" in hex, "&234" in octal and "%001010" in binary format. Some special keys for the screen editor have been added (Ctrl-Insert, Ctrl-Home and Ctrl-Crsr-Right)
+
+5. This one has some scroll options (try CTRL and CBM keys in combination), a Hardcopy-routine (? as far as I see from the sources, my C64 is packed) and a screen-blanker?
+
+* This description is for the latest version
+* BS  1.22.S41 is only number 1) and 2).
+* BS  1.25.S03 is a reengineering from 1.32, it only has ACIA routines, F-keys, hex/octal/binariy ints, the @-Disk commands but no tape. especially for a friend of mine who doesn't have the IEEE488.
+* BS  1.32.S63 has 1) to 4)
+* BS  1.33.S88 has all
+* BS  1.40.S89 has all except 1, but it has serial line routines for a 16550A UART (with FIFO) instead.
+
+A ROM image for 1.31, 1.32 and 1.40 is included. The ROM images have the UART/ACIA at $d600 and the TPI at $df00.
 
 ## How to use 
 The C64 patches have quite some history, so everything looks a bit messy.
@@ -74,22 +46,16 @@ routines instead of the UART routines only.
 You can change the mapping of the IEC devices by POKE-ing a new MAP value (as 
 described above) to $299.
 
-## Archive descriptions
-All files with a ".S??" at the end are source files for my selfwritten
-6502 Assembler for the C64 (see directory "assembler"). They can be edited 
-as a BASIC file and a RUN
-makes them assemble, if you have my assembler in the computer's memory 
-(at $7000).
-
-## Archive descriptions
-Note that the @ASS assembler used has a feature to print out a formatted listing
-during assembly. Open a file for writing, then during the assembly run
-in the .opt pseudo-opcode, redirect output to this opened file descriptor.
-For an example see the Screenshot_assembly.png file
+## Files
+* The `*.S??,P` files are source files for my self-written 6502 Assembler for the C64 (see directory "assembler"). They can be edited as a BASIC file and a RUN makes them assemble, if you have my assembler in the computer's memory (at $7000).
+* The `*.s` files are ASCII versions of the `*,P` files.
+* The `.lst` files are ASCII files containing the assembly together with the output hex. (The @ASS assembler used has a feature to print out a formatted listing during assembly. Open a file for writing, then during the assembly run in the .opt pseudo-opcode, redirect output to this opened file descriptor. For an example see the Screenshot_assembly.png file.)
+* The `*.commented.lst` files contain extra comments. These should be looked at in order to study the inner workings of the code.
+* The `*.ROM,P` files are complete KERNAL ROM images. The first two bytes are the CBM-style load address.
 
 ## Author
 
-This is Copyright A.Fachat, for distributing use my own 
+This is Copyright A. Fachat, for distributing use my own 
 [License](MYCOPYING.ASC)
 
 ### Info: Andre Fachat, afachat@gmx.de
